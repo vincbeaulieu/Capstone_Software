@@ -1,7 +1,13 @@
 # Capstone_Software
 
 Raspberry Pi Connection
-![](/media/sch_4.png)  
+![](/media/sch_4.png)
+
+## Requirements
+
+*Requirements use to run the python script:*
+import os
+
 
 ## References
 
