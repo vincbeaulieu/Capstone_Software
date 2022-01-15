@@ -1,7 +1,17 @@
 # Capstone_Software
 
 Raspberry Pi Connection
-![](/media/sch_4.png)  
+![](/media/sch_4.png)
+
+## Requirements
+
+python version 3.9
+
+```
+pip install matplotlib  # include numpy
+pip install tensorflow
+pip install pandas
+```
 
 ## References
 
