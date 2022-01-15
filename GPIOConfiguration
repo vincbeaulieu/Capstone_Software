@@ -1,0 +1,14 @@
+from gpiozero import PWMLED
+
+from signal import pause
+
+LED = PWMLED("BOARD3")
+
+
+def ledpulse():
+    LED.blink()
+    pause()
+
+
+if __name__ == "__main__":
+    ledpulse()
