@@ -5,9 +5,13 @@ Raspberry Pi Connection
 
 ## Requirements
 
-*Requirements use to run the python script:*
-import os
+python version 3.9
 
+```
+pip install matplotlib  # include numpy
+pip install tensorflow
+pip install pandas
+```
 
 ## References
 
