@@ -1,11 +1,11 @@
 
 import pickle as pk
 import os
+from tensorflow import keras as tfk
 
 # Saved ML model will be in the 'pkl' folder
-
-# Save a machine learning model
 def save(model,name=None):
+    # Save the machine learning model
     filepath = 'pkl/'
     if name != None:
         filepath += name
@@ -30,11 +30,13 @@ def save(model,name=None):
 
 
 # Load a machine learning model
-def load(filepath):
+def load(filename):
+    filepath = "pkl/" + filename
     model = pk.load(open(filepath,'rb'))
     return model
 
 
 def test():
     
+
     pass
