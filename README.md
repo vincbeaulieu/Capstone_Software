@@ -9,7 +9,7 @@ python version 3.9
 
 ```
 pip install matplotlib  # include numpy
-pip install tensorflow  # or tensorflow-gpu
+pip install tensorflow
 pip install pandas
 ```
 

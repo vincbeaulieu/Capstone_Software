@@ -3,6 +3,13 @@ import pickle as pk
 import os
 from tensorflow import keras as tfk
 
+def training():
+    from sklearn.model_selection import train_test_split
+    input_training, input_testing, output_training, output_testing = train_test_split(input_data, output_data, test_size=1/10, random_state=0)
+    
+    
+    pass
+
 # Saved ML model will be in the 'pkl' folder
 def save(model,name=None):
     # Save the machine learning model
