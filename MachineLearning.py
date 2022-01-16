@@ -3,7 +3,7 @@ import pickle as pk
 import os
 from tensorflow import keras as tfk
 
-def training():
+def training(input_data, output_data):
     from sklearn.model_selection import train_test_split
     input_training, input_testing, output_training, output_testing = train_test_split(input_data, output_data, test_size=1/10, random_state=0)
     
