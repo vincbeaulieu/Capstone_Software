@@ -15,6 +15,8 @@ def training(input_data,output_data):
     input_data = np.asarray(input_data).astype(np.int_)
     output_data = np.asarray(output_data).astype(np.int_)
 
+def training(input_data, output_data):
+  
     from sklearn.model_selection import train_test_split
     input_training, input_testing, output_training, output_testing = train_test_split(input_data, output_data, test_size=1/10, random_state=0)
     
