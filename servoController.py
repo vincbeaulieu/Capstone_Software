@@ -94,4 +94,3 @@ def test():
     servo.setContinuousServoFullReverseThrottle(1)
     time.sleep(1)
     servo.resetStandardServo(0)
-    servo.stopContinuousServoThrottle(1)
