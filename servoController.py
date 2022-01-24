@@ -88,9 +88,15 @@ class ServoController:
 
 def test():
     servo = ServoController(0, 180)
-    servo.setStandardServoAngle(1, 0)
-    servo.setContinuousServoFullThrottle(1)
     time.sleep(1)
-    servo.setContinuousServoFullReverseThrottle(1)
+    servo.setStandardServoAngle(1, 90)
     time.sleep(1)
-    servo.resetStandardServo(0)
+
+    for x in range(1, 80):
+        servo.setLedBrightness(2, 0.25)
+        time.sleep(1)
+        servo.setLedBrightness(2, 0.5)
+        time.sleep(1)
+        servo.setLedBrightness(2, 0.75)
+        time.sleep(1)
+        servo.setLedBrightness(2, 1)
