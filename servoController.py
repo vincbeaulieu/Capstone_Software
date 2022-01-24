@@ -100,3 +100,7 @@ def test():
         servo.setLedBrightness(2, 0.75)
         time.sleep(1)
         servo.setLedBrightness(2, 1)
+
+
+if __name__ == "__main__":
+    test()
