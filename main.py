@@ -1,7 +1,7 @@
 
 import MachineLearning as ML
 import toolbox
-import noise_generator
+import NoiseGenerator as NG
 
 def main():
     test()
@@ -13,7 +13,7 @@ def test():
     
     #toolbox.test()
     ML.test()
-    noise_generator.test() # placeholder
+    NG.test() # placeholder
 
     pass
 
