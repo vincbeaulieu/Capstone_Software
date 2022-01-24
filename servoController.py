@@ -85,22 +85,11 @@ class ServoController:
     def stopContinuousServoThrottle(self, channel):
         self.kit.continuous_servo[channel].throttle = 0
 
-
-def test():
-    servo = ServoController(0, 180)
+    kit.continuous_servo[0].throttle = -1
+    kit.continuous_servo[1].throttle = 1
     time.sleep(1)
-    servo.setStandardServoAngle(1, 90)
+    kit.continuous_servo[0].throttle = 1
+    kit.continuous_servo[1].throttle = -1
     time.sleep(1)
-
-    for x in range(1, 80):
-        servo.setLedBrightness(2, 0.25)
-        time.sleep(1)
-        servo.setLedBrightness(2, 0.5)
-        time.sleep(1)
-        servo.setLedBrightness(2, 0.75)
-        time.sleep(1)
-        servo.setLedBrightness(2, 1)
-
-
-if __name__ == "__main__":
-    test()
+    kit.continuous_servo[0].throttle = -1
+    kit.continuous_servo[1].throttle = 1
