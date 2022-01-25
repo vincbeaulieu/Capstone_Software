@@ -1,31 +1,33 @@
 import multiprocessing
+import time
+
 from pyomyo import Myo, emg_mode
+# Source of pyomyo library: https://github.com/PerlinWarp/pyomyo
 
-# ------------ Myo Setup ---------------
 q = multiprocessing.Queue()
+buffer_size = 5
 
 
+# This method gets the 5th latest myo band data
+# q is the multiprocessing.Queue which will hold the data
 def get_myoband_data(q):
+    print(q.qsize())
     emg = list(q.get())
     return emg
 
 
 def read_myoband_data(q):
+    # To change the mode of data, edit mode=emg_mode.<YourMode>
     m = Myo(mode=emg_mode.RAW)
     m.connect()
 
     def add_to_queue(emg, movement):
         q.put(emg)
+        while q.qsize() > buffer_size:
+            q.get()
 
     m.add_emg_handler(add_to_queue)
 
-    def print_battery(bat):
-        print("Battery level:", bat)
-
-    m.add_battery_handler(print_battery)
-
-    # Orange logo and bar LEDs
-    m.set_leds([128, 0, 0], [128, 0, 0])
     # Vibrate to know we connected okay
     m.vibrate(1)
 
@@ -33,19 +35,19 @@ def read_myoband_data(q):
         m.run()
 
 
-# -------- Main Program Loop -----------
 if __name__ == "__main__":
 
-    # to use the methods:
+    # To use the methods:
     # declare globally, q = multiprocessing.Queue()
-    # then in the main, the following lines:
+    # In the main, add the following lines in a try block:
     # p = multiprocessing.Process(target=read_myoband_data, args=(q,))
     # p.start()
-    # this is demonstrated in this script
-
-    p = multiprocessing.Process(target=read_myoband_data, args=(q,))
-    p.start()
-
-    while True:
-#        x = input("dd")
-        print(get_myoband_data(q))
+    # To get the latest value: call get_myoband_data(q) where q is the multiprocessing.Queue()
+    try:
+        p = multiprocessing.Process(target=read_myoband_data, args=(q,))
+        p.start()
+        while True:
+            print(get_myoband_data(q))
+    except KeyboardInterrupt:
+        p.terminate()
+        p.join()
