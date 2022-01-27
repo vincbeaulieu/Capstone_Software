@@ -84,12 +84,3 @@ class ServoController:
     # Stop continuous servo.
     def stopContinuousServoThrottle(self, channel):
         self.kit.continuous_servo[channel].throttle = 0
-
-    kit.continuous_servo[0].throttle = -1
-    kit.continuous_servo[1].throttle = 1
-    time.sleep(1)
-    kit.continuous_servo[0].throttle = 1
-    kit.continuous_servo[1].throttle = -1
-    time.sleep(1)
-    kit.continuous_servo[0].throttle = -1
-    kit.continuous_servo[1].throttle = 1
