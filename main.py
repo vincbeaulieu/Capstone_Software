@@ -2,7 +2,7 @@
 import MachineLearning as ML
 import toolbox
 import noise_generator
-import ServoController from servoController
+from servoController import ServoController
 
 def main():
     test()
