@@ -1,5 +1,6 @@
 import MachineLearning as ML
 import toolbox
+from servoController import ServoController
 
 def main():
     test()
@@ -10,8 +11,11 @@ def test():
     # Comment the test when done
     
     #toolbox.test()
-    ML.test()
+    #ML.test()
 
+    servo = ServoController(0, 0);
+    servo.setContinuousServo(0, 1);
+    servo.setContinuousServo(1, -1);
     pass
 
 if __name__ == '__main__':
