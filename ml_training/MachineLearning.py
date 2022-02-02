@@ -45,18 +45,6 @@ def training(input_data, output_data):
 
     return model, input_training, input_testing, output_training, output_testing
 
-    pass
-
-# Save a machine learning model
-def save(model,filepath):
-    os.makedirs(os.path.dirname(filepath), exist_ok=True)
-    pk.dump(model, open(filepath,'wb'))
-
-# Load a machine learning model
-def load(filepath):
-    model = pk.load(open(filepath,'rb'))
-    return model
-
 def test():
     print("Testing Machine Learning...")
 
@@ -65,9 +53,9 @@ def test():
 
     model, input_training, input_testing, output_training, output_testing = training(input,output)
 
-    save(model,'pkl/MachineLearningTest_v01.pkl')
+    model.save('pkl')
     sleep(2)
-    model = load('pkl/MachineLearningTest_v01.pkl')
+    model = tfk.models.load_model('pkl')
 
     estimated = model.predict(input)
     actual = output
