@@ -11,29 +11,30 @@ class ServoController:
     i2c = busio.I2C(board.SCL, board.SDA)
     hat = adafruit_pca9685.PCA9685(i2c)
 
-    # For constructor we define the servo channel pin (0-15) and degree of initial angle usually between 0-180.
+    # For constructor we define the servo channel pin (0-15) and degree of initial throttle usually between -1 to 1.
     def __init__(self, channel, throttle):
         self.channel = channel
         self.throttle = throttle
         self.kit.continuous_servo[channel].throttle = throttle
+        time.sleep(1)
 
     # Set Global frequency of all channel to a specific frequency.
     def setGlobalFrequency(self, frequency):
         self.hat.frequency = frequency
 
     # Set specific channel frequency.
-    def setChannelFrequency(self, channel, frequency):
-        led_channel = self.hat.channels[channel]
+    def setChannelFrequency(self, frequency):
+        led_channel = self.hat.channels[self.channel]
         led_channel.frequency = frequency
 
     # Get specific channel.
-    def getChannel(self, channel):
-        return self.hat.channels[channel]
+    def getChannel(self):
+        return self.hat.channels[self.channel]
 
     # Set Brightness of specific channel to either  0% , 25%, 50%, 75% or 100% using case values
     # [0, 0.25, 0.5, 0.75, 1].
-    def setLedBrightness(self, channel, case):
-        led_channel = self.hat.channels[channel]
+    def setLedBrightness(self, case):
+        led_channel = self.hat.channels[self.channel]
         if case == 0:
             led_channel.duty_cycle = 0
         elif case == 0.25:
@@ -50,37 +51,44 @@ class ServoController:
         self.kit.servo[channel].angle = degree
 
     # Change the actuation range of a specific servo by default 180.
-    def setStandardServoActuationRange(self, channel, degree):
-        self.kit.servo[channel].actuation_range = degree
+    def setStandardServoActuationRange(self, degree):
+        self.kit.servo[self.channel].actuation_range = degree
 
     # Set the pulse width range maximum and minimum.
-    def setPulseWidthRange(self, channel, minimum, maximum):
-        self.kit.servo[channel].set_pulse_width_range(minimum, maximum)
+    def setPulseWidthRange(self, minimum, maximum):
+        self.kit.servo[self.channel].set_pulse_width_range(minimum, maximum)
 
     # Reset the servo angle back to 0.
-    def resetStandardServo(self, channel):
-        self.kit.servo[channel].angle = 0
+    def resetStandardServo(self):
+        self.kit.servo[self.channel].angle = 0
+        time.sleep(1)
 
     # Set continuous servo to a throttle ranging from -1 to 1.
-    def setContinuousServo(self, channel, throttle):
-        self.kit.continuous_servo[channel].throttle = throttle
+    def setContinuousServo(self, throttle):
+        self.kit.continuous_servo[self.channel].throttle = throttle
+        time.sleep(1)
 
     # Set continuous servo to a full throttle.
-    def setContinuousServoFullThrottle(self, channel):
-        self.kit.continuous_servo[channel].throttle = 1
+    def setContinuousServoFullThrottle(self):
+        self.kit.continuous_servo[self.channel].throttle = 1
+        time.sleep(1)
 
     # Set continuous servo to a full reverse throttle.
-    def setContinuousServoFullReverseThrottle(self, channel):
-        self.kit.continuous_servo[channel].throttle = -1
+    def setContinuousServoFullReverseThrottle(self):
+        self.kit.continuous_servo[self.channel].throttle = -1
+        time.sleep(1)
 
     # Set continuous servo to a half throttle.
-    def setContinuousServoHalfThrottle(self, channel):
-        self.kit.continuous_servo[channel].throttle = 0.5
+    def setContinuousServoHalfThrottle(self):
+        self.kit.continuous_servo[self.channel].throttle = 0.5
+        time.sleep(1)
 
     # Set continuous servo to a half reverse throttle.
-    def setContinuousServoHalfReverseThrottle(self, channel):
-        self.kit.continuous_servo[channel].throttle = -0.5
+    def setContinuousServoHalfReverseThrottle(self):
+        self.kit.continuous_servo[self.channel].throttle = -0.5
+        time.sleep(1)
 
-    # Stop continuous servo.
-    def stopContinuousServoThrottle(self, channel):
-        self.kit.continuous_servo[channel].throttle = 0
+    # Reset continuous servo.
+    def resetContinuousServoThrottle(self):
+        self.kit.continuous_servo[self.channel].throttle = 0
+        time.sleep(1)
