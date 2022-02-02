@@ -1,7 +1,6 @@
 #import MachineLearning as ML
 #import toolbox
 #import noise_generator
-import time
 from servoController import ServoController
 
 def main():
