@@ -12,10 +12,10 @@ class ServoController:
     hat = adafruit_pca9685.PCA9685(i2c)
 
     # For constructor we define the servo channel pin (0-15) and degree of initial angle usually between 0-180.
-    def __init__(self, channel, degree):
+    def __init__(self, channel, throttle):
         self.channel = channel
-        self.degree = degree
-        self.kit.servo[channel].angle = degree
+        self.throttle = throttle
+        self.kit.continuous_servo[channel].throttle = throttle
 
     # Set Global frequency of all channel to a specific frequency.
     def setGlobalFrequency(self, frequency):
