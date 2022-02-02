@@ -1,6 +1,7 @@
 import pickle as pk
 import os
 from tensorflow import keras as tfk
+from tensorflow import expand_dims
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
@@ -26,7 +27,7 @@ def training(input_data, output_data):
     model = tfk.models.Sequential()
     
     # Nucleotide input layer (Documentation: Layers API)
-    model.add(tfk.layers.Dense(units=1, activation='relu'))
+    model.add(tfk.layers.Dense(units=2, activation='relu'))
 
     # Hidden layers
     model.add(tfk.layers.Dense(units=64, activation='relu'))
@@ -38,6 +39,10 @@ def training(input_data, output_data):
 
     # Generate the ANN (Optimizer, Metrics, and Losses API)
     model.compile(optimizer = 'Adam', loss = 'poisson', metrics = ['accuracy'])
+
+    # Tensorflow 2.7.0 compatability
+    input_training = expand_dims(input_training, axis=-1)
+    output_training = expand_dims(output_training, axis=-1)
 
     # Feed data to Neural Network
     model.fit(input_training, output_training, batch_size = 10, epochs = 10)
