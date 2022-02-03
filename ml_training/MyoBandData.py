@@ -2,7 +2,7 @@ import multiprocessing
 from time import sleep
 from pyomyo import Myo, emg_mode
 import numpy as np
-import csv as csv
+import csv
 
 # Source of pyomyo library: https://github.com/PerlinWarp/pyomyo
 
@@ -62,14 +62,23 @@ if __name__ == "__main__":
     try:
         p = multiprocessing.Process(target=read_myoband_data, args=(q_myo1,q_myo2,))
         p.start()
+        
+        # Erase content of the file:
+        with open('myodata.csv','w') as file:
+            file.close()
+
         while True:
             sleep(0.2)
             emg1, emg2 = get_myoband_data(q_myo1,q_myo2)
-            emg_data = np.concatenate(emg1, emg2, axis=None)
+            emg_data = np.concatenate((emg1, emg2), axis=None)
+
+            # Append content to the file:
             with open('myodata.csv','a',newline='') as file:
-                csv_writer = csv.writer(file)
-                csv_writer = csv.writerow(emg_data)
+                writer = csv.writer(file)
+                writer.writerow(emg_data)
+
             print(emg_data)
     except KeyboardInterrupt:
         p.terminate()
         p.join()
+        pass
