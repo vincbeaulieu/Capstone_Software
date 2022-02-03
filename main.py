@@ -1,4 +1,4 @@
-import MachineLearning as ML
+import ml_training.MachineLearning as ML
 import toolbox
 from servoController import ServoController
 
@@ -13,9 +13,9 @@ def test():
     #toolbox.test()
     #ML.test()
 
-    servo = ServoController(0, 0);
-    servo.setContinuousServo(0, 1);
-    servo.setContinuousServo(1, -1);
+    servo = ServoController(0, 0)
+    servo.setContinuousServo(0, 1)
+    servo.setContinuousServo(1, -1)
     pass
 
 if __name__ == '__main__':
