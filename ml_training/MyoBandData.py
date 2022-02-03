@@ -1,6 +1,8 @@
 import multiprocessing
 from time import sleep
 from pyomyo import Myo, emg_mode
+import pandas as pd
+import numpy as np
 # Source of pyomyo library: https://github.com/PerlinWarp/pyomyo
 
 q_myo1 = multiprocessing.Queue()
@@ -48,19 +50,29 @@ def read_myoband_data(q1, q2):
 
 
 if __name__ == "__main__":
-
     # To use the methods:
     # declare globally, q = multiprocessing.Queue()
     # In the main, add the following lines in a try block:
     # p = multiprocessing.Process(target=read_myoband_data, args=(q,))
     # p.start()
     # To get the latest value: call get_myoband_data(q) where q is the multiprocessing.Queue()
+    emg_toto = []
     try:
         p = multiprocessing.Process(target=read_myoband_data, args=(q_myo1,q_myo2,))
         p.start()
-        while True:
-            sleep(0.2)
-            print(get_myoband_data(q_myo1,q_myo2))
+        count = 15
+        while count > 0:
+            emg1, emg2 = get_myoband_data(q_myo1, q_myo2)
+            emg_data=np.concatenate((emg1, emg2), axis=None)
+            emg_toto.append(emg_data)
+            # with open('myodata.csv','a',newline='\n') as file:
+            #     file.write(str(emg_data))
+            print(emg_data)
+            count -= 1
+        cols = ["chan1", "chan2", "chan3", "chan4", "chan5", "chan6", "chan7", "chan8",
+            "chan9", "chan10", "chan11", "chan12", "chan13", "chan14", "chan15", "chan16"]
+        df = pd.DataFrame(emg_toto, columns=cols)
+        df.to_csv("HandClose.csv", index=False, mode='a')
     except KeyboardInterrupt:
         p.terminate()
         p.join()
