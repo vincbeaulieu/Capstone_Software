@@ -22,8 +22,8 @@ def get_myoband_data(q1, q2):
 
 def read_myoband_data(q1, q2):
     # To change the mode of data, edit mode=emg_mode.<YourMode>
-    myo_1 = Myo(mode=emg_mode.FILTERED)
-    myo_2 = Myo(mode=emg_mode.FILTERED)
+    myo_1 = Myo(mode=emg_mode.RAW)
+    myo_2 = Myo(mode=emg_mode.RAW)
 
     myo_1.connect(ADDRESS_MYO1) # RED LED
     myo_2.connect(ADDRESS_MYO2) # Turquoise LED
