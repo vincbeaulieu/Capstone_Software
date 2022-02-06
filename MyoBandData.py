@@ -11,7 +11,6 @@ buffer_size = 5
 # This method gets the 5th latest myo band data
 # q is the multiprocessing.Queue which will hold the data
 def get_myoband_data(q):
-    print(q.qsize())
     emg = list(q.get())
     return emg
 
