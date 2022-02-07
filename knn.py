@@ -5,9 +5,10 @@ import pandas as pd
 from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import StandardScaler
 from sklearn.neighbors import KNeighborsClassifier
-from MyoBandData import read_myoband_data, get_myoband_data
+from ml_training.MyoBandData import read_myoband_data, get_myoband_data
 
-q = multiprocessing.Queue()
+q1 = multiprocessing.Queue()
+q2 = multiprocessing.Queue()
 sc = StandardScaler()
 classifier = KNeighborsClassifier(n_neighbors=5, metric='minkowski', p=2)
 
@@ -34,25 +35,27 @@ def train_classifier():
     cm = confusion_matrix(y_test, y_pred)
     print(cm)
     print("accuracy:", accuracy_score(y_test, y_pred))
+    return classifier
+
+
+def get_predicted_movement(emg, scaler, knn_classifier):
+    emg_transformed = scaler.transform(emg)
+    emg_predicted = knn_classifier.predict(emg_transformed)
+    return emg_predicted
 
 
 if __name__ == "__main__":
     train_classifier()
     print("Starting myoband")
     try:
-        p = multiprocessing.Process(target=read_myoband_data, args=(q,))
+        p = multiprocessing.Process(target=read_myoband_data, args=(q1, q2, ))
         p.start()
         time.sleep(5)
         while True:
             input("Press enter to start")
-            emg = get_myoband_data(q)
-            # just doubling it up for now, will change when have 2 myobands going
-            emg = emg + emg
+            emg1, emg2 = get_myoband_data(q1, q2)
             emg_data = []
-            emg_data.append(emg)
-            emg_transformed = sc.transform(emg_data)
-            emg_predicted = classifier.predict(emg_transformed)
-            print(emg_predicted)
+            emg_data.append(emg1 + emg2)
 
     except KeyboardInterrupt:
         p.terminate()
