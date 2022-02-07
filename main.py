@@ -3,10 +3,26 @@ import time
 from sklearn.preprocessing import StandardScaler
 from ml_training.MyoBandData import read_myoband_data, get_myoband_data
 from knn import train_classifier, get_predicted_movement
-from servoGestureOutput import motion
+#from servoGestureOutput import motion
 
 q1 = multiprocessing.Queue()
 q2 = multiprocessing.Queue()
+
+q3 = []
+counter = [0,0,0]
+index_dictionary = {
+    0:'handClose',
+    1:'handOpen',
+    2:'handRelax'
+}
+
+dictionary = {
+    'handClose':0,
+    'handOpen':1,
+    'handRelax':2
+}
+
+
 
 def main():
     test()
@@ -20,13 +36,24 @@ def test():
         p.start()
         time.sleep(5)
         while True:
-            input("Press enter to start")
             emg1, emg2 = get_myoband_data(q1, q2)
             emg_data = []
             emg_data.append(emg1 + emg2)
+
             predicted = get_predicted_movement(emg_data, sc, classifier)
             print(predicted)
-            motion(predicted[0])
+            if len(q3) >= 11:
+                counter_index = counter.index(max(counter))
+                #motion(dictionary[counter_index])
+                print(dictionary[counter_index])
+                print(counter)
+                q3.clear()
+                counter[:] = 0
+            else:
+                prediction = predicted[0]
+                q3.append(prediction)
+                counter_index = dictionary[prediction]
+                counter[counter_index] += 1
 
     except KeyboardInterrupt:
         p.terminate()
