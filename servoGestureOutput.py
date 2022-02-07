@@ -22,7 +22,7 @@ gesture = {
 
 # TODO: test method :)
 def motion(input):
-    if input is not "handRelax":
+    if input != "handRelax":
         for servo in range(0, 5):
             kit.continuous_servo[servo].throttle = gesture[input][servo]
 
@@ -33,15 +33,15 @@ def validGestures():
         print("    " + key)
 
 
-validGestures()
+#validGestures()
 
-while True:
-    userInput = input("\nEnter Gesture: ")
-    if userInput == 'exit':
-        motion(userInput)
-        break
-    elif userInput in gesture:
-        motion(userInput)
-    else:
-        print("Invalid Gesture")
-        validGestures()
+#while True:
+#    userInput = input("\nEnter Gesture: ")
+#    if userInput == 'exit':
+#        motion(userInput)
+#        break
+#    elif userInput in gesture:
+#        motion(userInput)
+#    else:
+#        print("Invalid Gesture")
+#        validGestures()

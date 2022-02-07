@@ -26,7 +26,7 @@ def test():
             emg_data.append(emg1 + emg2)
             predicted = get_predicted_movement(emg_data, sc, classifier)
             print(predicted)
-            motion(predicted)
+            motion(predicted[0])
 
     except KeyboardInterrupt:
         p.terminate()
