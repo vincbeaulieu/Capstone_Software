@@ -17,7 +17,7 @@ classifier = KNeighborsClassifier(n_neighbors=5, metric='minkowski', p=2)
 # feature extraction and encoder function
 
 def train_classifier():
-    dataset = pd.read_csv('csv/gesture2.csv')
+    dataset = pd.read_csv('csv/SuyashData.csv')
     X = dataset.iloc[:, :-1].values
     y = dataset.iloc[:, -1].values
 
