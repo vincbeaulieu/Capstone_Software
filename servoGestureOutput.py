@@ -20,10 +20,11 @@ gesture = {
     'handExit': [1, 1, -1, -1, -1]  # exit
 }
 
-
+# TODO: test method :)
 def motion(input):
-    for servo in range(0, 5):
-        kit.continuous_servo[servo].throttle = gesture[input][servo]
+    if input is not "handRelax":
+        for servo in range(0, 5):
+            kit.continuous_servo[servo].throttle = gesture[input][servo]
 
 
 def validGestures():

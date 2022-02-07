@@ -6,6 +6,7 @@ from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import StandardScaler
 from sklearn.neighbors import KNeighborsClassifier
 from ml_training.MyoBandData import read_myoband_data, get_myoband_data
+#from servoGestureOutput import motion
 
 q1 = multiprocessing.Queue()
 q2 = multiprocessing.Queue()
@@ -16,12 +17,12 @@ classifier = KNeighborsClassifier(n_neighbors=5, metric='minkowski', p=2)
 # feature extraction and encoder function
 
 def train_classifier():
-    dataset = pd.read_csv('csv\gesture.csv')
+    dataset = pd.read_csv('csv/gesture2.csv')
     X = dataset.iloc[:, :-1].values
     y = dataset.iloc[:, -1].values
 
     # to read
-    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.25, random_state=0)
+    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.1, random_state=1)
 
     # scaling
     X_train = sc.fit_transform(X_train)
@@ -35,7 +36,7 @@ def train_classifier():
     cm = confusion_matrix(y_test, y_pred)
     print(cm)
     print("accuracy:", accuracy_score(y_test, y_pred))
-    return classifier
+    return classifier, sc
 
 
 def get_predicted_movement(emg, scaler, knn_classifier):
@@ -56,6 +57,9 @@ if __name__ == "__main__":
             emg1, emg2 = get_myoband_data(q1, q2)
             emg_data = []
             emg_data.append(emg1 + emg2)
+            predicted = get_predicted_movement(emg_data, sc, classifier)
+            print(predicted)
+            #motion(predicted)
 
     except KeyboardInterrupt:
         p.terminate()
