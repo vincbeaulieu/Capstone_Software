@@ -35,15 +35,15 @@ def test():
         p = multiprocessing.Process(target=read_myoband_data, args=(q1, q2,))
         p.start()
         time.sleep(5)
+        print("Would you like to calibrate the arm?")
+        input_command = input()
+        if input_command[0] == 'Y' or 'y':
+            file_path = create_dataset()
+        else:
+            print('Enter file name: ', end='')
+            file_path = input()
 
-        cin = input('Would you like to calibrate the arm? (y/n): ')
-        filepath = "csv/" + input("Enter filename for dataset: ") + ".csv"
-        if cin == "y" :
-            try:
-                create_dataset(filepath)
-            except Exception as e:
-                print(e)
-        classifier, sc = train_classifier(file_path)
+        file_path = create_dataset() #"csv/" + 'Vincent_Data' + ".csv" #create_dataset(        classifier, sc = train_classifier(file_path)
         while True:
             emg1, emg2 = get_myoband_data(q1, q2)
             emg_data = []
@@ -76,8 +76,10 @@ def test():
 
 # Creates the dataset in the csv folder. Returns the path of the file relative to
 # the top directory of the project (returns path like "csv/<filename>.csv)
-def create_dataset(filepath):
+def create_dataset():
     print("Starting data collection for calibration...")
+    filename = input("Enter filename for dataset: ")
+    filepath = "csv/" + filename + ".csv"
     secs = 5
     gestures = list(dictionary.keys())
     arm_positions = ["arm extended to the front", "arm relaxed by your side", "arm extended out to the side"]
@@ -96,6 +98,7 @@ def create_dataset(filepath):
             df = pd.DataFrame(myo_data)
             df.to_csv(filepath, index=False, header=False, mode='a')
     print("Data collection complete. Dataset file created")
+    return filepath
 
 
 if __name__ == '__main__':
