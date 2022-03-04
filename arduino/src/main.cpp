@@ -1,33 +1,42 @@
 #include <Arduino.h>
 
-int val_a0 = 0;
-int val_a1 = 0;
-int val_a2 = 0;
-int val_a3 = 0;
-int val_a4 = 0;
+int valArray[5];
+int maxValue;
 
 void setup() {
   Serial.begin(9600);
+
+  analogWrite(PIN_A5, 255);
 }
 
 void loop() {
-  val_a0 = analogRead(PIN_A0);
-  // val_a1 = analogRead(PIN_A1);
-  // val_a2 = analogRead(PIN_A2);
-  // val_a3 = analogRead(PIN_A3);
-  // val_a4 = analogRead(PIN_A4);
 
-  Serial.println("----------------------------");
-  Serial.print("Pin 0: ");
-  Serial.println(val_a0);
-  // Serial.print("Pin 1: ");
-  // Serial.println(val_a1);  
-  // Serial.print("Pin 1: ");
-  // Serial.println(val_a2);
-  // Serial.print("Pin 3: ");
-  // Serial.println(val_a3);
-  // Serial.print("Pin 4: ");
-  // Serial.println(val_a4);
+  for (size_t i = 0; i < 5; i++)
+  {
+    valArray[i] = analogRead(i);
+  }
+
+  maxValue = valArray[0];
+  for (size_t i = 1; i < 5; i++)
+  {
+    if (valArray[i] > maxValue)
+    {
+      maxValue = valArray[i];
+    }
+  }
+  
+  if (maxValue > 300)
+  {
+    analogWrite(PIN_A5, 255/2);
+    Serial.print("ON, ");
+    Serial.println(maxValue);
+  }
+  else 
+  {
+    analogWrite(PIN_A5, 255);
+    Serial.print("OFF, ");
+    Serial.println(maxValue);
+  }
 
   delay(200);
 }
