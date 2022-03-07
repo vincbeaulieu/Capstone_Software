@@ -1,6 +1,7 @@
 from ml_training.MyoBandData import read_myoband_data, get_myoband_data
-from knn import train_classifier, get_predicted_movement
-from servoGestureOutput import motion
+# from knn import train_classifier, get_predicted_movement
+from lda import train_classifier, get_predicted_movement
+# from servoGestureOutput import motion
 import numpy as np
 import pandas as pd
 import multiprocessing
@@ -14,19 +15,31 @@ counter = [0, 0, 0]
 index_dictionary = {
     0: 'handClose',
     1: 'handOpen',
-    2: 'handRelax'
+    # 2: 'handRelax',
+    # 3: 'handRock',
+    # 4: 'handPeace',
+    # 5: 'handOk',
+    6: 'handThumbsUp',
+    7: 'handIndex',
+    8: 'handFlip',
+    9: 'handRing',
+    10: 'handPinky'
+
 }
 
 dictionary = {
     'handClose': 0,
     'handOpen': 1,
-    'handRelax': 2
+    # 'handRelax': 2,
+    # 'handRock': 3,
+    # 'handPeace': 4,
+    # 'handOk': 5,
+    'handThumbsUp': 6,
+    'handIndex': 7,
+    'handFlip': 8,
+    'handRing': 9,
+    'handPinky': 10
 }
-
-
-def main():
-    test()
-    return 0
 
 
 def test():
@@ -38,36 +51,38 @@ def test():
 
         cin = input('Would you like to calibrate the arm? (y/n): ')
         filepath = "csv/" + input("Enter filename for dataset: ") + ".csv"
-        if cin == "y" :
+        if cin == "y":
             try:
                 create_dataset(filepath)
             except Exception as e:
                 print(e)
-        classifier, sc = train_classifier(file_path)
+        classifier, sc = train_classifier(filepath)
         while True:
             emg1, emg2 = get_myoband_data(q1, q2)
             emg_data = []
             emg_data.append(emg1 + emg2)
-
+            tx = input('press any key to enter prediction .\n')
             predicted = get_predicted_movement(emg_data, sc, classifier)
-
-            if len(q3) >= 11:
-                counter_index = counter.index(max(counter))
-                motion(index_dictionary[counter_index])
-                print(index_dictionary[counter_index])
-                #                time.sleep(0.5)
-                q3.clear()
-                counter[0] = 0
-                counter[1] = 0
-                counter[2] = 0
-            else:
-                prediction = predicted[0]
-                q3.append(prediction)
-                counter_index = dictionary[prediction]
-                counter[counter_index] += 1
+            print(predicted)
+            # print("q3",q3)
+            #
+            # if len(q3) >= 11:
+            #     counter_index = counter.index(max(counter))
+            #     # motion(index_dictionary[counter_index])
+            #     print(index_dictionary[counter_index])
+            #     time.sleep(0.5)
+            #     q3.clear()
+            #     counter[0] = 0
+            #     counter[1] = 0
+            #     counter[2] = 0
+            # else:
+            #     prediction = predicted[0]
+            #     q3.append(prediction)
+            #     counter_index = dictionary[prediction]
+            #     counter[counter_index] += 1
 
     except KeyboardInterrupt:
-        motion("handExit")
+        # motion("handExit")
         p.terminate()
         p.join()
 
@@ -78,12 +93,11 @@ def test():
 # the top directory of the project (returns path like "csv/<filename>.csv)
 def create_dataset(filepath):
     print("Starting data collection for calibration...")
-    secs = 5
+    secs = 0.5
     gestures = list(dictionary.keys())
     arm_positions = ["arm extended to the front", "arm relaxed by your side", "arm extended out to the side"]
     for arm_position in arm_positions:
         print("Collecting data with " + arm_position)
-        i = 0
         for gesture in gestures:
             input("Press enter to collect data for " + gesture)
             start_time = time.time()
@@ -99,4 +113,4 @@ def create_dataset(filepath):
 
 
 if __name__ == '__main__':
-    main()
+    test()
