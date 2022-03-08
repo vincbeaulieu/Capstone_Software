@@ -1,6 +1,6 @@
 from ml_training.MyoBandData import read_myoband_data, get_myoband_data
-# from knn import train_classifier, get_predicted_movement
-from lda import train_classifier, get_predicted_movement
+from knn import train_classifier, get_predicted_movement
+# from lda import train_classifier, get_predicted_movement
 # from servoGestureOutput import motion
 import numpy as np
 import pandas as pd
@@ -9,16 +9,27 @@ import time
 
 q1 = multiprocessing.Queue()
 q2 = multiprocessing.Queue()
-
 q3 = []
-counter = [0, 0, 0]
+counter = [
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0
+]
 index_dictionary = {
     0: 'handClose',
     1: 'handOpen',
-    # 2: 'handRelax',
-    # 3: 'handRock',
-    # 4: 'handPeace',
-    # 5: 'handOk',
+    2: 'handRelax',
+    3: 'handRock',
+    4: 'handPeace',
+    5: 'handOk',
     6: 'handThumbsUp',
     7: 'handIndex',
     8: 'handFlip',
@@ -30,10 +41,10 @@ index_dictionary = {
 dictionary = {
     'handClose': 0,
     'handOpen': 1,
-    # 'handRelax': 2,
-    # 'handRock': 3,
-    # 'handPeace': 4,
-    # 'handOk': 5,
+    'handRelax': 2,
+    'handRock': 3,
+    'handPeace': 4,
+    'handOk': 5,
     'handThumbsUp': 6,
     'handIndex': 7,
     'handFlip': 8,
@@ -61,25 +72,34 @@ def test():
             emg1, emg2 = get_myoband_data(q1, q2)
             emg_data = []
             emg_data.append(emg1 + emg2)
-            tx = input('press any key to enter prediction .\n')
+            # tx = input('press any key to enter prediction .\n')
             predicted = get_predicted_movement(emg_data, sc, classifier)
-            print(predicted)
-            # print("q3",q3)
-            #
-            # if len(q3) >= 11:
-            #     counter_index = counter.index(max(counter))
-            #     # motion(index_dictionary[counter_index])
-            #     print(index_dictionary[counter_index])
-            #     time.sleep(0.5)
-            #     q3.clear()
-            #     counter[0] = 0
-            #     counter[1] = 0
-            #     counter[2] = 0
-            # else:
-            #     prediction = predicted[0]
-            #     q3.append(prediction)
-            #     counter_index = dictionary[prediction]
-            #     counter[counter_index] += 1
+
+            if len(q3) >= 9:
+                counter_index = counter.index(max(counter))
+                # motion(index_dictionary[counter_index])
+                print(index_dictionary[counter_index])
+
+                q3.clear()
+                counter[0] = 0
+                counter[1] = 0
+                counter[2] = 0
+                counter[3] = 0
+                counter[4] = 0
+                counter[5] = 0
+                counter[6] = 0
+                counter[7] = 0
+                counter[8] = 0
+                counter[9] = 0
+                counter[10] = 0
+
+
+            else:
+                prediction = predicted[0]
+                q3.append(prediction)
+                counter_index = dictionary[prediction]
+                counter_index
+                counter[counter_index] += 1
 
     except KeyboardInterrupt:
         # motion("handExit")
