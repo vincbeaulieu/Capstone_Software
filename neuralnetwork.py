@@ -4,7 +4,7 @@ from sklearn.neural_network import MLPClassifier
 import pandas as pd
 import pickle as pk
 
-classifier = MLPClassifier(max_iter=500)
+classifier = MLPClassifier(max_iter=2000)
 knn_filename = 'saved_model'
 
 
@@ -18,7 +18,7 @@ def load_model(file_name):
 
 
 def train_classifier(file_path):
-    print("Starting LDA classifier training...")
+    print("Starting NN classifier training...")
     dataset = pd.read_csv(file_path)
     X = dataset.iloc[:, :-1].values
     y = dataset.iloc[:, -1].values
@@ -39,12 +39,12 @@ def train_classifier(file_path):
     print(cm)
     print("accuracy:", accuracy_score(y_test, y_pred))
     save_model(classifier, knn_filename)
-    print("LDA Classifier training complete.")
+    print("NN Classifier training complete.")
     return classifier
 
 
-def get_predicted_movement(emg, lda_classifier):
-    emg_predicted = lda_classifier.predict(emg)
+def get_predicted_movement(emg, nn_classifier):
+    emg_predicted = nn_classifier.predict(emg)
     return emg_predicted
 if __name__ == "__main__":
     train_classifier()

@@ -1,6 +1,7 @@
 from ml_training.MyoBandData import read_myoband_data, get_myoband_data
-from knn import train_classifier, get_predicted_movement
+# from knn import train_classifier, get_predicted_movement
 # from lda import train_classifier, get_predicted_movement
+from neuralnetwork import train_classifier, get_predicted_movement
 # from servoGestureOutput import motion
 import numpy as np
 import pandas as pd
@@ -67,15 +68,15 @@ def test():
                 create_dataset(filepath)
             except Exception as e:
                 print(e)
-        classifier, sc = train_classifier(filepath)
+        classifier= train_classifier(filepath)
         while True:
             emg1, emg2 = get_myoband_data(q1, q2)
             emg_data = []
             emg_data.append(emg1 + emg2)
             # tx = input('press any key to enter prediction .\n')
-            predicted = get_predicted_movement(emg_data, sc, classifier)
+            predicted = get_predicted_movement(emg_data, classifier)
 
-            if len(q3) >= 9:
+            if len(q3) >= 15:
                 counter_index = counter.index(max(counter))
                 # motion(index_dictionary[counter_index])
                 print(index_dictionary[counter_index])
