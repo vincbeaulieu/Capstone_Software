@@ -1,10 +1,18 @@
-from sklearn.metrics import confusion_matrix, accuracy_score, f1_score
+from sklearn.metrics import confusion_matrix, accuracy_score
 from sklearn.model_selection import train_test_split
-from sklearn.neural_network import MLPClassifier
+from sklearn.preprocessing import StandardScaler
+from sklearn.discriminant_analysis import LinearDiscriminantAnalysis
+from ml_training.MyoBandData import read_myoband_data, get_myoband_data
 import pandas as pd
 import pickle as pk
+import multiprocessing
+import time
 
-classifier = MLPClassifier(max_iter=500)
+
+q1 = multiprocessing.Queue()
+q2 = multiprocessing.Queue()
+sc = StandardScaler()
+classifier = LinearDiscriminantAnalysis()
 knn_filename = 'saved_model'
 
 
@@ -17,6 +25,7 @@ def load_model(file_name):
     return pk.load(open(file_name, 'rb'))
 
 
+
 def train_classifier(file_path):
     print("Starting LDA classifier training...")
     dataset = pd.read_csv(file_path)
@@ -26,9 +35,9 @@ def train_classifier(file_path):
     # to read
     X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.1, random_state=1)
 
-    # # scaling
-    # X_train = sc.fit_transform(X_train)
-    # X_test = sc.transform(X_test)
+    # scaling
+    X_train = sc.fit_transform(X_train)
+    X_test = sc.transform(X_test)
 
     classifier.fit(X_train, y_train)
 
@@ -40,12 +49,15 @@ def train_classifier(file_path):
     print("accuracy:", accuracy_score(y_test, y_pred))
     save_model(classifier, knn_filename)
     print("LDA Classifier training complete.")
-    return classifier
+    return classifier, sc
 
 
-def get_predicted_movement(emg, lda_classifier):
-    emg_predicted = lda_classifier.predict(emg)
+def get_predicted_movement(emg, scaler, lda_classifier):
+    emg_transformed = scaler.transform(emg)
+    emg_predicted = lda_classifier.predict(emg_transformed)
     return emg_predicted
+
+
 if __name__ == "__main__":
     train_classifier()
     print("Starting myoband")
