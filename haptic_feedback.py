@@ -20,7 +20,7 @@ class HapticFeedback(Thread):
                             arduino.write(b'\x01')
                         else:
                             arduino.write(b'\x00')
-                        sleep(0.1)
+                    sleep(0.1)   
                 arduino.write(b'\x00')
 
         except SerialException as e:
