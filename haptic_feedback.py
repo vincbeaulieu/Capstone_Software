@@ -40,8 +40,6 @@ def test():
     try:
         hf.start()
         print('Haptic feedback test starting')
-        print('Disabled')
-        sleep(5)
         hf.enable()
         print('Enabled')
         sleep(5)
