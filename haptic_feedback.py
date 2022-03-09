@@ -1,4 +1,4 @@
-import serial
+from serial import Serial, SerialException
 from threading import Thread
 from time import sleep
 
@@ -8,25 +8,32 @@ class HapticFeedback(Thread):
         self.is_enabled = False
         self.port = port
         self.baud_rate = baud_rate
+        self.running = True
 
     def run(self):
-        with serial.Serial(self.port, self.baud_rate, timeout=1) as arduino:
-            sleep(0.1)
-            while(True):
-                if arduino.isOpen():
-                    if (self.is_enabled):
-                        arduino.write(b'\x01')
-                    else:
-                        arduino.write(b'\x00')
-                    sleep(0.1)
-                else:
-                    print('Arduino not connected, haptic feedback not operational')
-            
+        try:
+            with Serial(self.port, self.baud_rate, timeout=1) as arduino:
+                sleep(0.1)
+                while(self.running):
+                    if arduino.isOpen():
+                        if (self.is_enabled):
+                            arduino.write(b'\x01')
+                        else:
+                            arduino.write(b'\x00')
+                        sleep(0.1)
+                arduino.write(b'\x00')
+
+        except SerialException as e:
+            print('\nArduino not connected, haptic feedback not operational')
+
     def enable(self):
         self.is_enabled = True
 
     def disable(self):
         self.is_enabled = False
+
+    def terminate(self):
+        self.running = False
 
 def test():
     hf = HapticFeedback('/dev/ttyUSB0', 9600)
@@ -40,8 +47,12 @@ def test():
     hf.disable()
     print('Disabled')
     sleep(5)
+    hf.enable()
+    print('Enabled')
+    sleep(5)
     print('Exiting')
-    exit(0)
+    hf.terminate()
+    hf.join()
 
 if __name__ == '__main__':
     test()
