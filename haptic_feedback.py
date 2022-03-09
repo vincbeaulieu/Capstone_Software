@@ -19,6 +19,8 @@ class HapticFeedback(Thread):
                     else:
                         arduino.write(b'\x00')
                     sleep(1)
+                else:
+                    print('Arduino not connected, haptic feedback not operational')
             
     def enable(self):
         self.is_enabled = True
