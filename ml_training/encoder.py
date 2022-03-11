@@ -1,4 +1,5 @@
 
+import numpy as np
 
 # One Hot Encoder
 def one_hot_encoder(sequence,categories,scale=None,remove_last=True):
