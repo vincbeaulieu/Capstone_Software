@@ -16,16 +16,16 @@ def my_callback(channel):
     if GPIO.input(10) == 0:
         end = time()
         elapsed = end - start
-
-    if elapsed >= 4:
-        buttonStatus = 3
-        print("Button was pushed for a while!")
-    elif elapsed >= 2:
-        buttonStatus = 2
-        print("Button was pushed for a bit!")
-    elif elapsed >= .1:
-        buttonStatus = 1
-        print("Button was pushed!")
+        
+        if elapsed >= 4:
+            buttonStatus = 3
+            print("Button was pushed for a while!")
+        elif elapsed >= 2:
+            buttonStatus = 2
+            print("Button was pushed for a bit!")
+        elif elapsed >= .1:
+            buttonStatus = 1
+            print("Button was pushed!")
 
 
 GPIO.add_event_detect(10, GPIO.BOTH, callback=my_callback, bouncetime=200)
