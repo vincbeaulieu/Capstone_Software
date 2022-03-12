@@ -13,17 +13,15 @@ def myInterrupt(channel):
 
     buttonTime = time.time() - start_time  # How long was the button down?
 
-    if .1 <= buttonTime < 2:  # Ignore noise
-        buttonStatus = 1  # 1= brief push
-        return buttonStatus
-
-    elif 2 <= buttonTime < 4:
-        buttonStatus = 2  # 2= Long push
-        return buttonStatus
-
-    elif buttonTime >= 4:
-        buttonStatus = 3  # 3= really long push
-        return buttonStatus
+    if buttonTime >= 4:
+        buttonStatus = 3
+        print("Button was pushed for a very long time!")
+    elif buttonTime >= 2:
+        buttonStatus = 2
+        print("Button was pushed for a long time!")
+    elif buttonTime >= .1:
+        buttonStatus = 1
+        print("Button was pushed!")
 
 
 GPIO.setwarnings(False)  # Ignore warning for now
