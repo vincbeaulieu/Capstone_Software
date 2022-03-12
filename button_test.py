@@ -1,7 +1,6 @@
 # Sample code from https://raspberrypihq.com/use-a-push-button-with-raspberry-pi-gpio/
 import RPi.GPIO as GPIO  # Import Raspberry Pi GPIO library
-from time import time as time
-from time import sleep as sleep
+import time
 
 
 def myInterrupt(channel):
@@ -32,4 +31,4 @@ GPIO.add_event_detect(10, GPIO.FALLING, callback=myInterrupt, bouncetime=500)
 while True:  # Run forever
     if GPIO.input(10) == GPIO.HIGH:
         print("Button was pushed!")
-        sleep(0.1)
+        time.sleep(0.1)
