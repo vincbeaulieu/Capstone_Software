@@ -1,3 +1,5 @@
+import os
+
 from ml_training.MyoBandData import read_myoband_data, get_myoband_data
 # from knn import train_classifier, get_predicted_movement
 # from lda import train_classifier, get_predicted_movement
@@ -6,7 +8,13 @@ from neuralnetwork import train_classifier, get_predicted_movement
 import numpy as np
 import pandas as pd
 import multiprocessing
-import time
+from time import sleep, time
+import RPi.GPIO as GPIO
+
+GPIO.setmode(GPIO.BOARD)  # Use physical pin numbering
+GPIO.setup(10, GPIO.IN, pull_up_down=GPIO.PUD_DOWN)  # Set pin 10 to be an input pin
+
+global buttonStatus
 
 q1 = multiprocessing.Queue()
 q2 = multiprocessing.Queue()
@@ -54,22 +62,64 @@ dictionary = {
 }
 
 
+def button(channel):
+    global start
+    global end
+    global buttonStatus
+
+    if GPIO.input(10) == 1:
+        start = time()
+    if GPIO.input(10) == 0:
+        end = time()
+        elapsed = end - start
+
+        if elapsed >= 5:
+            buttonStatus = 2
+
+        elif elapsed >= .1:
+            buttonStatus = 1
+
+
+GPIO.add_event_detect(10, GPIO.BOTH, callback=button, bouncetime=200)
+
+
 def test():
+    global buttonStatus
     print("Starting myoband connection...")
     try:
         p = multiprocessing.Process(target=read_myoband_data, args=(q1, q2,))
         p.start()
         time.sleep(5)
 
-        cin = input('Would you like to calibrate the arm? (y/n): ')
-        filepath = "csv/" + input("Enter filename for dataset: ") + ".csv"
-        if cin == "y":
+        filepath = "csv/dataset.csv"
+        if os.stat(filepath).st_size == 0:
             try:
-                create_dataset(filepath)
+                calibrate(filepath)
             except Exception as e:
                 print(e)
-        classifier= train_classifier(filepath)
+
+        classifier = train_classifier(filepath)
+
         while True:
+
+            if buttonStatus == 1:
+                try:
+                    calibrate(filepath)
+                    classifier = train_classifier(filepath)
+                    buttonStatus = 0
+                except Exception as e:
+                    print(e)
+
+            if buttonStatus == 2:
+                try:
+                    with open(filepath, 'w') as file:
+                        file.writerows("")
+                    buttonStatus = 0
+                    calibrate(filepath)
+                    classifier = train_classifier(filepath)
+                except Exception as e:
+                    print(e)
+
             emg1, emg2 = get_myoband_data(q1, q2)
             emg_data = []
             emg_data.append(emg1 + emg2)
@@ -102,6 +152,7 @@ def test():
                 counter_index
                 counter[counter_index] += 1
 
+
     except KeyboardInterrupt:
         # motion("handExit")
         p.terminate()
@@ -112,7 +163,7 @@ def test():
 
 # Creates the dataset in the csv folder. Returns the path of the file relative to
 # the top directory of the project (returns path like "csv/<filename>.csv)
-def create_dataset(filepath):
+def calibrate(filepath):
     print("Starting data collection for calibration...")
     secs = 0.5
     gestures = list(dictionary.keys())
