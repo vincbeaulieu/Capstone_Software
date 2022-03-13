@@ -4,7 +4,7 @@ from ml_training.MyoBandData import read_myoband_data, get_myoband_data
 # from knn import train_classifier, get_predicted_movement
 # from lda import train_classifier, get_predicted_movement
 from neuralnetwork import train_classifier, get_predicted_movement
-from servoGestureOutput import motion
+from servoGestureOutput import motion, gestures_positions
 import numpy as np
 import pandas as pd
 import multiprocessing
@@ -18,19 +18,7 @@ q1 = multiprocessing.Queue()
 q2 = multiprocessing.Queue()
 q3 = []
 
-gestures = [
-    'handClose',
-    'handOpen',
-    'handRelax',
-    'handRock',
-    'handPeace',
-    'handOk',
-    'handThumbsUp',
-    'handIndex',
-    'handFlip',
-    'handRing',
-    'handPinky'
-]
+gestures = list(gestures_positions.keys())
 gesture_counters = [0] * len(gestures)
 
 
@@ -130,6 +118,7 @@ def calibrate(filepath):
 
     for gesture in gestures:
         print('Please perform the following gesture: ' + str(gesture))
+        motion(gesture)
 
         while buttonStatus != 1:
             pass  # Wait button press
