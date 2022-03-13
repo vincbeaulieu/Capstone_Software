@@ -1,23 +1,34 @@
-import multiprocessing
-import time
 from sklearn.metrics import confusion_matrix, accuracy_score
-import pandas as pd
 from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import StandardScaler
 from sklearn.neighbors import KNeighborsClassifier
 from ml_training.MyoBandData import read_myoband_data, get_myoband_data
+import pandas as pd
+import pickle as pk
+import multiprocessing
+import time
 #from servoGestureOutput import motion
 
 q1 = multiprocessing.Queue()
 q2 = multiprocessing.Queue()
 sc = StandardScaler()
 classifier = KNeighborsClassifier(n_neighbors=5, metric='minkowski', p=2)
+knn_filename = 'saved_model'
 
 
-# feature extraction and encoder function
+def save_model(model, file_name):
+    with open(file_name, 'wb') as knn_file:
+        pk.dump(model, knn_file)
 
-def train_classifier():
-    dataset = pd.read_csv('csv/gesture2.csv')
+
+def load_model(file_name):
+    return pk.load(open(file_name, 'rb'))
+
+
+# Trains KNN classifier with the data in file at file_path (csv/<dataset>.csv)
+def train_classifier(file_path):
+    print("Starting KNN classifier training...")
+    dataset = pd.read_csv(file_path)
     X = dataset.iloc[:, :-1].values
     y = dataset.iloc[:, -1].values
 
@@ -31,11 +42,13 @@ def train_classifier():
     classifier.fit(X_train, y_train)
 
     y_pred = classifier.predict(X_test)
-    print(y_pred)
+#    print(y_pred)
 
     cm = confusion_matrix(y_test, y_pred)
     print(cm)
     print("accuracy:", accuracy_score(y_test, y_pred))
+    save_model(classifier, knn_filename)
+    print("KNN Classifier training complete.")
     return classifier, sc
 
 

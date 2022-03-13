@@ -69,10 +69,7 @@ if __name__ == "__main__":
             #     file.write(str(emg_data))
             print(emg_data)
             count -= 1
-        cols = ["chan1", "chan2", "chan3", "chan4", "chan5", "chan6", "chan7", "chan8",
-            "chan9", "chan10", "chan11", "chan12", "chan13", "chan14", "chan15", "chan16"]
-        df = pd.DataFrame(emg_toto, columns=cols)
-        df.to_csv("HandClose.csv", index=False, mode='a')
+
     except KeyboardInterrupt:
         p.terminate()
         p.join()
