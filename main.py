@@ -168,8 +168,11 @@ def calibrate(filepath):
     secs = 1
     gestures = list(dictionary.keys())
     for gesture in gestures:
-        #input("Press enter to collect data for " + gesture)
-        # wait for button single press
+
+        while buttonStatus != 1:
+            pass # Wait button press
+        buttonStatus = 0
+        
         # light led up
         start_time = time.time()
         myo_data = []
