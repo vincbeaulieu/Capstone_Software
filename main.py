@@ -133,6 +133,8 @@ def calibrate(filepath):
             emg = np.concatenate((m1, m2, gesture), axis=None)
             myo_data.append(emg)
 
+        motion('handOpen')
+
         print("Gesture collection done... writing to file")
         df = pd.DataFrame(myo_data)
         df.to_csv(filepath, index=False, header=False, mode='a')
