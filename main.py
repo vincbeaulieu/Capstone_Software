@@ -92,7 +92,10 @@ def test():
         time.sleep(5)
 
         filepath = "csv/dataset.csv"
-        if os.stat(filepath).st_size == 0:
+        num_lines = sum(1 for line in open(filepath))
+        
+        # if there is less than 10 lines, we assume the file to be empty
+        if num_lines < 10:
             try:
                 calibrate(filepath)
             except Exception as e:
@@ -102,21 +105,15 @@ def test():
 
         while True:
 
-            if buttonStatus == 1:
+            if buttonStatus == 1 or buttonStatus == 2: # may be replace with: if buttonStatus in (1,2):
                 try:
-                    calibrate(filepath)
-                    classifier = train_classifier(filepath)
-                    buttonStatus = 0
-                except Exception as e:
-                    print(e)
+                    if buttonStatus == 2:  # Then erase all the content of the file
+                        with open(filepath, 'w') as file:
+                            file.writerows("")
 
-            if buttonStatus == 2:
-                try:
-                    with open(filepath, 'w') as file:
-                        file.writerows("")
-                    buttonStatus = 0
                     calibrate(filepath)
                     classifier = train_classifier(filepath)
+                    buttonStatus = 0
                 except Exception as e:
                     print(e)
 
@@ -172,18 +169,23 @@ def calibrate(filepath):
         while buttonStatus != 1:
             pass # Wait button press
         buttonStatus = 0
-        
-        # light led up
+
+        #TODO: light led up
+
         start_time = time.time()
         myo_data = []
         while time.time() - start_time < secs:
             m1, m2 = get_myoband_data(q1, q2)
             emg = np.concatenate((m1, m2, gesture), axis=None)
             myo_data.append(emg)
-        print("Gesture collection done... writing to file")
+
+        # print("Gesture collection done... writing to file")
         df = pd.DataFrame(myo_data)
         df.to_csv(filepath, index=False, header=False, mode='a')
-        # close led
+
+        #TODO: close led
+
+    # TODO: LED blink twice
     print("Data collection complete. Dataset file created")
 
 
