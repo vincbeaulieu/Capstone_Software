@@ -165,22 +165,22 @@ def test():
 # the top directory of the project (returns path like "csv/<filename>.csv)
 def calibrate(filepath):
     print("Starting data collection for calibration...")
-    secs = 0.5
+    secs = 1
     gestures = list(dictionary.keys())
-    arm_positions = ["arm extended to the front", "arm relaxed by your side", "arm extended out to the side"]
-    for arm_position in arm_positions:
-        print("Collecting data with " + arm_position)
-        for gesture in gestures:
-            input("Press enter to collect data for " + gesture)
-            start_time = time.time()
-            myo_data = []
-            while time.time() - start_time < secs:
-                m1, m2 = get_myoband_data(q1, q2)
-                emg = np.concatenate((m1, m2, gesture), axis=None)
-                myo_data.append(emg)
-            print("Gesture collection done... writing to file")
-            df = pd.DataFrame(myo_data)
-            df.to_csv(filepath, index=False, header=False, mode='a')
+    for gesture in gestures:
+        #input("Press enter to collect data for " + gesture)
+        # wait for button single press
+        # light led up
+        start_time = time.time()
+        myo_data = []
+        while time.time() - start_time < secs:
+            m1, m2 = get_myoband_data(q1, q2)
+            emg = np.concatenate((m1, m2, gesture), axis=None)
+            myo_data.append(emg)
+        print("Gesture collection done... writing to file")
+        df = pd.DataFrame(myo_data)
+        df.to_csv(filepath, index=False, header=False, mode='a')
+        # close led
     print("Data collection complete. Dataset file created")
 
 
