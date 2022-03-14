@@ -2,7 +2,7 @@ from sklearn.metrics import confusion_matrix, accuracy_score
 from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import StandardScaler
 from sklearn.discriminant_analysis import LinearDiscriminantAnalysis
-from ml_training.MyoBandData import read_myoband_data, get_myoband_data
+from myoband.MyoBandData import read_myoband_data, get_myoband_data
 import pandas as pd
 import pickle as pk
 import multiprocessing
