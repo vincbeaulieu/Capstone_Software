@@ -1,147 +1,138 @@
-import os
-
 from ml_training.MyoBandData import read_myoband_data, get_myoband_data
 # from knn import train_classifier, get_predicted_movement
 # from lda import train_classifier, get_predicted_movement
-from neuralnetwork import train_classifier, get_predicted_movement
-from servoGestureOutput import motion, gestures_positions
+# from neuralnetwork import train_classifier, get_predicted_movement
+from TestModels import train_classifier, get_predicted_movement
+# from servoGestureOutput import motion
 import numpy as np
 import pandas as pd
 import multiprocessing
-from time import sleep, time
-import RPi.GPIO as GPIO
-
-GPIO.setmode(GPIO.BOARD)  # Use physical pin numbering
-GPIO.setup(10, GPIO.IN, pull_up_down=GPIO.PUD_DOWN)  # Set pin 10 to be an input pin
+import time
 
 q1 = multiprocessing.Queue()
 q2 = multiprocessing.Queue()
 q3 = []
+counter = [
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0
+]
+index_dictionary = {
+    0: 'handClose',
+    1: 'handOpen',
+    2: 'handRelax',
+#    3: 'handRock',
+    4: 'handPeace',
+    # 5: 'handOk',
+    # 6: 'handThumbsUp',
+    # 7: 'handIndex',
+    # 8: 'handFlip',
+    # 9: 'handRing',
+    # 10: 'handPinky',
+    # 11: 'handLateral'
+}
 
-gestures = list(gestures_positions.keys())
-gesture_counters = [0] * len(gestures)
-
-
-buttonStatus = 0
-def button():
-    global buttonStatus
-    start = []
-
-    if GPIO.input(10) == 1:
-        start = time()
-
-    if GPIO.input(10) == 0:  # using "else" will improve performance
-        end = time()
-        elapsed = end - start
-
-        if elapsed >= 5:
-            buttonStatus = 2
-
-        elif elapsed >= .1:
-            buttonStatus = 1
-
-
-GPIO.add_event_detect(10, GPIO.BOTH, callback=button, bouncetime=200)
+dictionary = {
+    'handClose': 0,
+    'handOpen': 1,
+    'handRelax': 2,
+#    'handRock': 3,
+    'handPeace': 4,
+    # 'handOk': 5,
+    # 'handThumbsUp': 6,
+    # 'handIndex': 7,
+    # 'handFlip': 8,
+    # 'handRing': 9,
+    # 'handPinky': 10,
+    # 'handLateral': 11
+}
 
 
 def test():
-    global buttonStatus, gesture_counters
-
-    print("Starting Myoband connection...")
-    p = multiprocessing.Process(target=read_myoband_data, args=(q1, q2,))
-
+    print("Starting myoband connection...")
     try:
+        p = multiprocessing.Process(target=read_myoband_data, args=(q1, q2,))
         p.start()
-        sleep(5)
+        time.sleep(5)
 
-        filepath = "csv/dataset.csv"
-        num_lines = sum(1 for line in open(filepath))
-
-        # if there is less than 10 lines, we assume the file to be empty
-        if num_lines < 10:
-            # Therefore, calibration is initiated
+        cin = input('Would you like to calibrate the arm? (y/n): ')
+        filepath = "csv/" + input("Enter filename for dataset: ") + ".csv"
+        if cin == "y":
             try:
-                calibrate(filepath)
+                create_dataset(filepath)
             except Exception as e:
                 print(e)
-
-        classifier = train_classifier(filepath)
-
+        classifier,sc= train_classifier(filepath)
         while True:
-
-            if buttonStatus in (1, 2):
-                try:
-                    if buttonStatus == 2:  # Then erase all the content of the file
-                        with open(filepath, 'w') as file:
-                            file.writelines("")
-
-                    calibrate(filepath)
-                    classifier = train_classifier(filepath)
-                    buttonStatus = 0
-                except Exception as e:
-                    print(e)
-
             emg1, emg2 = get_myoband_data(q1, q2)
-            emg_data = [emg1 + emg2]
-            predicted = get_predicted_movement(emg_data, classifier)
+            emg_data = []
+            emg_data.append(emg1 + emg2)
+            # tx = input('press any key to enter prediction .\n')
+            predicted = get_predicted_movement(emg_data,sc, classifier)
 
             if len(q3) >= 15:
-                counter_index = gesture_counters.index(max(gesture_counters))
-
-                # Perform the motion on the prosthetic
-                motion(gestures[counter_index])
-
-                print(gestures[counter_index])
+                counter_index = counter.index(max(counter))
+                # motion(index_dictionary[counter_index])
+                print(index_dictionary[counter_index])
 
                 q3.clear()
-                gesture_counters = [0] * len(gestures)
+                counter[0] = 0
+                counter[1] = 0
+                counter[2] = 0
+                counter[3] = 0
+                counter[4] = 0
+                counter[5] = 0
+                counter[6] = 0
+                counter[7] = 0
+                counter[8] = 0
+                counter[9] = 0
+                counter[10] = 0
+
 
             else:
                 prediction = predicted[0]
                 q3.append(prediction)
-                counter_index = gestures.index(prediction)
-                gesture_counters[counter_index] += 1
+                counter_index = dictionary[prediction]
+                counter_index
+                counter[counter_index] += 1
 
     except KeyboardInterrupt:
-        motion("handExit")
+        print("bye")
         p.terminate()
         p.join()
 
+#    pass
 
-# Creates the dataset in the csv folder. Returns the path of the file relative to
+
+# Creates the dataset in the csv folder. Returns the path of the file relative t                                                                             o
 # the top directory of the project (returns path like "csv/<filename>.csv)
-def calibrate(filepath):
-    global buttonStatus
-
+def create_dataset(filepath):
     print("Starting data collection for calibration...")
     secs = 1
-
-    for gesture in gestures:
-        print('Please perform the following gesture: ' + str(gesture))
-        motion(gesture)
-
-        while buttonStatus != 1:
-            pass  # Wait button press
-        buttonStatus = 0
-
-        # TODO: light led up
-
-        start_time = time()
-        myo_data = []
-        while time() - start_time < secs:
-            m1, m2 = get_myoband_data(q1, q2)
-            emg = np.concatenate((m1, m2, gesture), axis=None)
-            myo_data.append(emg)
-
-        motion('handOpen')
-
-        print("Gesture collection done... writing to file")
-        df = pd.DataFrame(myo_data)
-        df.to_csv(filepath, index=False, header=False, mode='a')
-
-        # TODO: close led
-
-    # TODO: LED blink twice
+    gestures = list(dictionary.keys())
+    arm_positions = ["arm extended to the front", "arm relaxed by your side", "a                                                                             rm extended out to the side"]
+    for x in range(4):
+        for arm_position in arm_positions:
+            print("Collecting data with " + arm_position)
+            for gesture in gestures:
+                input("Press enter to collect data for " + gesture)
+                start_time = time.time()
+                myo_data = []
+                while time.time() - start_time < secs:
+                    m1, m2 = get_myoband_data(q1, q2)
+                    emg = np.concatenate((m1, m2, gesture), axis=None)
+                    myo_data.append(emg)
+                print("Gesture collection done... writing to file")
+                df = pd.DataFrame(myo_data)
+                df.to_csv(filepath, index=False, header=False, mode='a')
     print("Data collection complete. Dataset file created")
 
 
