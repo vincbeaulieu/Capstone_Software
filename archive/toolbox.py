@@ -33,7 +33,7 @@ def test():
     print("Testing Toolbox...")
 
     my_dataset = [10,20,30,40]
-    filepath = 'csv/my_dataset.csv'
+    filepath = '../csv/my_dataset.csv'
 
     print("\nToolbox test :: Export dataset to csv :: return: Pandas Dataframe")
     my_dataframe = dataset_to_csv(filepath,my_dataset)
@@ -45,7 +45,7 @@ def test():
 
     print("\nToolbox test :: CSV Reader :: return: List of Lists")
     my_csvset = [[10,20,30,40],[5,15,25,35]]
-    filepath = 'csv/my_csvset.csv'
+    filepath = '../csv/my_csvset.csv'
     my_dataframe = dataset_to_csv(filepath,my_csvset)
     my_csv = csv_reader(filepath)
     print(my_csv)

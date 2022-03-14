@@ -13,7 +13,7 @@ q1 = multiprocessing.Queue()
 q2 = multiprocessing.Queue()
 sc = StandardScaler()
 classifier = KNeighborsClassifier(n_neighbors=5, metric='minkowski', p=2)
-knn_filename = 'saved_model'
+knn_filename = 'ML/saved_model'
 
 
 def save_model(model, file_name):
