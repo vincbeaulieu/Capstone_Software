@@ -13,7 +13,7 @@ q1 = multiprocessing.Queue()
 q2 = multiprocessing.Queue()
 sc = StandardScaler()
 classifier = LinearDiscriminantAnalysis()
-knn_filename = 'ML/saved_model'
+knn_filename = '../ML/saved_model'
 
 
 def save_model(model, file_name):
@@ -23,7 +23,6 @@ def save_model(model, file_name):
 
 def load_model(file_name):
     return pk.load(open(file_name, 'rb'))
-
 
 
 def train_classifier(file_path):
@@ -59,7 +58,7 @@ def get_predicted_movement(emg, scaler, lda_classifier):
 
 
 if __name__ == "__main__":
-    train_classifier()
+    train_classifier("../csv/suyash10gpieday.csv")
     print("Starting myoband")
     try:
         p = multiprocessing.Process(target=read_myoband_data, args=(q1, q2, ))
@@ -68,8 +67,7 @@ if __name__ == "__main__":
         while True:
             input("Press enter to start")
             emg1, emg2 = get_myoband_data(q1, q2)
-            emg_data = []
-            emg_data.append(emg1 + emg2)
+            emg_data = [emg1 + emg2]
             predicted = get_predicted_movement(emg_data, sc, classifier)
             print(predicted)
             #motion(predicted)

@@ -1,4 +1,5 @@
-from sklearn.metrics import confusion_matrix, accuracy_score
+import matplotlib.pyplot as plt
+from sklearn.metrics import confusion_matrix, accuracy_score, plot_confusion_matrix
 from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import StandardScaler
 from sklearn.neighbors import KNeighborsClassifier
@@ -13,7 +14,7 @@ q1 = multiprocessing.Queue()
 q2 = multiprocessing.Queue()
 sc = StandardScaler()
 classifier = KNeighborsClassifier(n_neighbors=5, metric='minkowski', p=2)
-knn_filename = 'ML/saved_model'
+knn_filename = '../ml/saved_model'
 
 
 def save_model(model, file_name):
@@ -47,6 +48,8 @@ def train_classifier(file_path):
     cm = confusion_matrix(y_test, y_pred)
     print(cm)
     print("accuracy:", accuracy_score(y_test, y_pred))
+    plot_confusion_matrix(classifier, X_test, y_test)
+    plt.show()
     save_model(classifier, knn_filename)
     print("KNN Classifier training complete.")
     return classifier, sc
@@ -59,21 +62,4 @@ def get_predicted_movement(emg, scaler, knn_classifier):
 
 
 if __name__ == "__main__":
-    train_classifier()
-    print("Starting myoband")
-    try:
-        p = multiprocessing.Process(target=read_myoband_data, args=(q1, q2, ))
-        p.start()
-        time.sleep(5)
-        while True:
-            input("Press enter to start")
-            emg1, emg2 = get_myoband_data(q1, q2)
-            emg_data = []
-            emg_data.append(emg1 + emg2)
-            predicted = get_predicted_movement(emg_data, sc, classifier)
-            print(predicted)
-            #motion(predicted)
-
-    except KeyboardInterrupt:
-        p.terminate()
-        p.join()
+    train_classifier("../csv/suyash10gpieday.csv")
