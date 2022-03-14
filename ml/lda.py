@@ -4,9 +4,10 @@ from sklearn.preprocessing import StandardScaler
 from sklearn.discriminant_analysis import LinearDiscriminantAnalysis
 from myoband.MyoBandData import read_myoband_data, get_myoband_data
 import pandas as pd
-import pickle as pk
 import multiprocessing
 import time
+
+import general_ml as gml
 
 
 q1 = multiprocessing.Queue()
@@ -14,15 +15,6 @@ q2 = multiprocessing.Queue()
 sc = StandardScaler()
 classifier = LinearDiscriminantAnalysis()
 knn_filename = '../ML/saved_model'
-
-
-def save_model(model, file_name):
-    with open(file_name, 'wb') as knn_file:
-        pk.dump(model, knn_file)
-
-
-def load_model(file_name):
-    return pk.load(open(file_name, 'rb'))
 
 
 def train_classifier(file_path):
@@ -46,7 +38,7 @@ def train_classifier(file_path):
     cm = confusion_matrix(y_test, y_pred)
     print(cm)
     print("accuracy:", accuracy_score(y_test, y_pred))
-    save_model(classifier, knn_filename)
+    gml.save_model(classifier, knn_filename)
     print("LDA Classifier training complete.")
     return classifier, sc
 

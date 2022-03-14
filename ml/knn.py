@@ -3,27 +3,21 @@ from sklearn.metrics import confusion_matrix, accuracy_score, plot_confusion_mat
 from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import StandardScaler
 from sklearn.neighbors import KNeighborsClassifier
-from myoband.MyoBandData import read_myoband_data, get_myoband_data
 import pandas as pd
-import pickle as pk
 import multiprocessing
-import time
+
+
+import general_ml as gml
+
 #from servoGestureOutput import motion
 
 q1 = multiprocessing.Queue()
 q2 = multiprocessing.Queue()
 sc = StandardScaler()
 classifier = KNeighborsClassifier(n_neighbors=5, metric='minkowski', p=2)
+
+
 knn_filename = '../ml/saved_model'
-
-
-def save_model(model, file_name):
-    with open(file_name, 'wb') as knn_file:
-        pk.dump(model, knn_file)
-
-
-def load_model(file_name):
-    return pk.load(open(file_name, 'rb'))
 
 
 # Trains KNN classifier with the data in file at file_path (csv/<dataset>.csv)
@@ -50,7 +44,7 @@ def train_classifier(file_path):
     print("accuracy:", accuracy_score(y_test, y_pred))
     plot_confusion_matrix(classifier, X_test, y_test)
     plt.show()
-    save_model(classifier, knn_filename)
+    gml.save_model(classifier, knn_filename)
     print("KNN Classifier training complete.")
     return classifier, sc
 
