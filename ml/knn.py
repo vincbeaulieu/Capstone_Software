@@ -2,58 +2,79 @@ import matplotlib.pyplot as plt
 from sklearn.metrics import confusion_matrix, accuracy_score, plot_confusion_matrix
 from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import StandardScaler
-from sklearn.neighbors import KNeighborsClassifier
 import pandas as pd
-import multiprocessing
+import pickle as pk
 
 
-import general_ml as gml
-
-#from servoGestureOutput import motion
-
-q1 = multiprocessing.Queue()
-q2 = multiprocessing.Queue()
-sc = StandardScaler()
-classifier = KNeighborsClassifier(n_neighbors=5, metric='minkowski', p=2)
+def save_model(model, model_path):
+    with open(model_path, 'wb') as ml_file:
+        pk.dump(model, ml_file)
 
 
-knn_filename = '../ml/saved_model'
+def load_model(model_path):
+    model = pk.load(open(model_path, 'rb'))
+    return model
 
 
-# Trains KNN classifier with the data in file at file_path (csv/<dataset>.csv)
-def train_classifier(file_path):
-    print("Starting KNN classifier training...")
-    dataset = pd.read_csv(file_path)
-    X = dataset.iloc[:, :-1].values
+# Trains classifier with the data in data_filepath (csv/<dataset>.csv)
+def train_model(model, dataset_path):
+    print("Starting model training...")
+
+    # Extracting data from csv
+    dataset = pd.read_csv(dataset_path)
+    x = dataset.iloc[:, :-1].values
     y = dataset.iloc[:, -1].values
 
-    # to read
-    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.1, random_state=1)
+    # Splitting the dataset into training_set and test_set
+    x_train, x_test, y_train, y_test = train_test_split(x, y, test_size=0.1, random_state=1)
 
-    # scaling
-    X_train = sc.fit_transform(X_train)
-    X_test = sc.transform(X_test)
+    # Scaling the data
+    sc = StandardScaler()
+    x_train = sc.fit_transform(x_train)
+    x_test = sc.transform(x_test)
 
-    classifier.fit(X_train, y_train)
+    # Training the model
+    model.fit(x_train, y_train)
 
-    y_pred = classifier.predict(X_test)
-#    print(y_pred)
+    # Testing the classifier by getting predictions
+    y_pred = model.predict(x_test)
 
+    # Displaying the confusion matrix
     cm = confusion_matrix(y_test, y_pred)
     print(cm)
-    print("accuracy:", accuracy_score(y_test, y_pred))
-    plot_confusion_matrix(classifier, X_test, y_test)
+    plot_confusion_matrix(model, x_test, y_test)
     plt.show()
-    gml.save_model(classifier, knn_filename)
-    print("KNN Classifier training complete.")
-    return classifier, sc
+
+    # Printing the model accuracy
+    model_accuracy = accuracy_score(y_test, y_pred)
+    print("Accuracy: ", model_accuracy)
+
+    # Returning the model
+    print("Model training completed.")
+    return model, sc
 
 
-def get_predicted_movement(emg, scaler, knn_classifier):
-    emg_transformed = scaler.transform(emg)
-    emg_predicted = knn_classifier.predict(emg_transformed)
-    return emg_predicted
+def get_prediction(input_data, model, scaler):
+    transformed_data = scaler.transform(input_data)
+    prediction = model.predict(transformed_data)
+    return prediction
 
 
 if __name__ == "__main__":
-    train_classifier("../csv/suyash10gpieday.csv")
+    # Import ML model library
+    from sklearn.neighbors import KNeighborsClassifier
+
+    # Creating a ML model
+    knn_model = KNeighborsClassifier(n_neighbors=5, metric='minkowski', p=2)
+
+    # Loading a ML model
+    # knn_model = load_model('../ml/saved_model')
+
+    # Training the model
+    knn_model, knn_scaler = train_model(knn_model, "../csv/suyash10gpieday.csv")
+
+    # Saving the model
+    save_model(knn_model, '../ml/saved_model')
+
+    # Using the model to predict input data
+    # get_prediction(emg_input, knn_model, knn_scaler)

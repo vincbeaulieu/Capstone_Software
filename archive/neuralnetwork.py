@@ -6,7 +6,7 @@ from sklearn.neural_network import MLPClassifier
 import pandas as pd
 
 
-import general_ml as gml
+import ml.general_ml as gml
 
 classifier = MLPClassifier(max_iter=2000)
 knn_filename = 'ML/saved_model'
