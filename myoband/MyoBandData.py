@@ -16,20 +16,20 @@ def get_myoband_data(q1, q2):
     emg_2 = list(q2.get())
     return emg_1, emg_2
 
-def read_myoband_data(q, addr):
-    # To change the mode of data, edit mode=emg_mode.<YourMode>
-    myo = Myo(mode=emg_mode.RAW)
-    myo.connect(addr)
-    print(myo.bt.get_connections())
-    print('device name: %s' % myo.read_attr(0x03).payload)
-
-    # qsize is broken on Mac and probably on Windows as well.
-    def add_to_queue_myo(emg, movement):
-        q.put(emg)
-        while q.qsize > BUFFER_SIZE:
-            q.get()
-
-    myo.add_emg_handler(add_to_queue_myo)
+# def read_myoband_data(q, addr):
+#     # To change the mode of data, edit mode=emg_mode.<YourMode>
+#     myo = Myo(mode=emg_mode.RAW)
+#     myo.connect(addr)
+#     print(myo.bt.get_connections())
+#     print('device name: %s' % myo.read_attr(0x03).payload)
+#
+#     # qsize is broken on Mac and probably on Windows as well.
+#     def add_to_queue_myo(emg, movement):
+#         q.put(emg)
+#         while q.qsize > BUFFER_SIZE:
+#             q.get()
+#
+#     myo.add_emg_handler(add_to_queue_myo)
 
 
 def read_myoband_data(q1, q2):

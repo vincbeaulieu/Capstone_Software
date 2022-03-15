@@ -5,20 +5,7 @@ from rbpi.servoGestureOutput import motion
 import multiprocessing
 from time import sleep
 
-
-if __name__ == "__main__":
-
-    # Import and create a ML model
-    from sklearn.discriminant_analysis import LinearDiscriminantAnalysis
-    lda_model = LinearDiscriminantAnalysis()
-
-    # Select a ML model
-    ml_model = lda_model
-
-    # Train the ML model
-    dataset_name = "suyash10gpieday.csv"
-    ml_model, ml_scaler = train_model(ml_model, dataset_name)
-
+def myo_predict(ml_model, ml_scaler):
     # Main Code
     q1 = multiprocessing.Queue()
     q2 = multiprocessing.Queue()
@@ -47,3 +34,16 @@ if __name__ == "__main__":
     except KeyboardInterrupt:
         p.terminate()
         p.join()
+
+if __name__ == "__main__":
+
+    # Import and create a ML model
+    from sklearn.discriminant_analysis import LinearDiscriminantAnalysis
+    lda_model = LinearDiscriminantAnalysis()
+
+    # Train the ML model
+    dataset_name = "suyash10gpieday.csv"
+    lda_model, lda_scaler = train_model(lda_model, dataset_name)
+
+
+
