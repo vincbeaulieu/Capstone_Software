@@ -1,11 +1,10 @@
-from sklearn.model_selection import train_test_split
-
-import ml.knn as ml_algorithm
+from ml.ml_class import train_model, get_prediction, load_model
 from myoband.MyoBandData import read_myoband_data, get_myoband_data
 from sklearn.preprocessing import StandardScaler
 import multiprocessing
 import time
 
+from rbpi.servoGestureOutput import motion
 
 q1 = multiprocessing.Queue()
 q2 = multiprocessing.Queue()
@@ -14,7 +13,7 @@ sc = StandardScaler()
 
 
 def myo_predict(model):
-    ml_algorithm.train_model(model)
+    train_model(model)
 
     print("Starting myoband")
     p = multiprocessing.Process(target=read_myoband_data, args=(q1, q2,))
@@ -32,3 +31,14 @@ def myo_predict(model):
     except KeyboardInterrupt:
         p.terminate()
         p.join()
+
+
+if __name__ == "__main__":
+
+    # Import a ML library
+    from sklearn.neighbors import KNeighborsClassifier
+
+    # Load a ML model
+    knn_model = load_model('../ml/saved_model')
+
+    myo_predict()

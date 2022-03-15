@@ -4,20 +4,36 @@ from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import StandardScaler
 import pandas as pd
 import pickle as pk
+from pathlib import Path
 
 
-def save_model(model, model_path):
-    with open(model_path, 'wb') as ml_file:
-        pk.dump(model, ml_file)
+def save_model(model, scaler, name="untitled"):
+    pathname = "saved_model/" + name
+
+    # Creating a directory if it doesn't exist
+    Path(pathname).mkdir(parents=True, exist_ok=True)
+
+    # Saving the model
+    pk.dump(model, open(pathname + "/model.pkl", 'wb'))
+
+    # Saving the scaler
+    pk.dump(scaler, open(pathname + "/scaler.pkl", 'wb'))
 
 
-def load_model(model_path):
-    model = pk.load(open(model_path, 'rb'))
-    return model
+def load_model(name="untitled"):
+    pathname = "saved_model/" + name
+
+    # Loading the model
+    model = pk.load(open(pathname + "/model.pkl", 'rb'))
+
+    # Loading the scaler
+    scaler = pk.load(open(pathname + "/scaler.pkl", 'rb'))
+
+    return model, scaler
 
 
 # Trains classifier with the data in data_filepath (csv/<dataset>.csv)
-def train_model(model, dataset_path):
+def train_model(model, dataset_path="../csv/dataset.csv"):
     print("Starting model training...")
 
     # Extracting data from csv
@@ -61,20 +77,21 @@ def get_prediction(input_data, model, scaler):
 
 
 if __name__ == "__main__":
-    # Import ML model library
+
+    # Import a ML library
     from sklearn.neighbors import KNeighborsClassifier
 
-    # Creating a ML model
+    # Create a ML model
     knn_model = KNeighborsClassifier(n_neighbors=5, metric='minkowski', p=2)
 
-    # Loading a ML model
+    # Load a ML model
     # knn_model = load_model('../ml/saved_model')
 
-    # Training the model
+    # Train the ML model
     knn_model, knn_scaler = train_model(knn_model, "../csv/suyash10gpieday.csv")
 
-    # Saving the model
-    save_model(knn_model, '../ml/saved_model')
+    # Save the ML model
+    save_model(knn_model, knn_scaler, "knn_test")
 
-    # Using the model to predict input data
+    # Use the ML model
     # get_prediction(emg_input, knn_model, knn_scaler)
