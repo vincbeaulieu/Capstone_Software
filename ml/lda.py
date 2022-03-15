@@ -12,7 +12,7 @@ if __name__ == "__main__":
     dataset_name = "suyash10gpieday.csv"
     lda_model, lda_scaler = train_model(lda_model, dataset_name)
 
-    # Use the model on the emg data
+    # Use the ML model with the Myobands
     myo_predict(lda_model, lda_scaler)
 
 

@@ -131,5 +131,7 @@ if __name__ == "__main__":
     knn_model, knn_scaler = load_model(model_name)
 
     # Use the ML model
-    # prediction = get_prediction(emg_input, knn_model, knn_scaler)
+    # prediction = get_prediction(input_data, knn_model, knn_scaler)
+
+    # Use the ML model with the Myobands
     myo_predict(knn_model, knn_scaler)
