@@ -6,6 +6,11 @@ import pandas as pd
 import pickle as pk
 from pathlib import Path
 
+from myoband.MyoBandData import read_myoband_data, get_myoband_data
+from rbpi.servoGestureOutput import motion
+import multiprocessing
+from time import sleep
+
 
 def save_model(model, scaler, name="untitled"):
     pathname = "saved_model/" + name
@@ -76,9 +81,37 @@ def get_prediction(input_data, model, scaler):
     return prediction
 
 
+def myo_predict(ml_model, ml_scaler):
+    q1 = multiprocessing.Queue()
+    q2 = multiprocessing.Queue()
+    p = multiprocessing.Process(target=read_myoband_data, args=(q1, q2,))
+    try:
+        print("Starting myoband...")
+        p.start()
+        sleep(5)
+
+        # Wait for user input
+        input("Press enter to start")
+
+        while True:
+            # Read data from EMG sensors
+            emg1, emg2 = get_myoband_data(q1, q2)
+            emg_data = [emg1 + emg2]
+
+            # Use the ML model on the EMG data
+            prediction = get_prediction(emg_data, ml_model, ml_scaler)
+
+            # Display and Perform the predicted gesture
+            print(prediction)
+            motion(prediction)
+
+    except KeyboardInterrupt:
+        p.terminate()
+        p.join()
+
+
 # Basic Machine Learning Structure:
 if __name__ == "__main__":
-
     # Import a ML library
     from sklearn.neighbors import KNeighborsClassifier
 
@@ -99,3 +132,4 @@ if __name__ == "__main__":
 
     # Use the ML model
     # prediction = get_prediction(emg_input, knn_model, knn_scaler)
+    myo_predict(knn_model, knn_scaler)
