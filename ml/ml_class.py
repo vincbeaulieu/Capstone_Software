@@ -7,7 +7,7 @@ import pickle as pk
 from pathlib import Path
 
 from myoband.MyoBandData import read_myoband_data, get_myoband_data
-from rbpi.servoGestureOutput import motion
+#from rbpi.servoGestureOutput import motion
 import multiprocessing
 from time import sleep
 
@@ -103,7 +103,7 @@ def myo_predict(ml_model, ml_scaler):
 
             # Display and Perform the predicted gesture
             print(prediction)
-            motion(prediction)
+            # motion(prediction)  # This line only work on the raspberry pi
 
     except KeyboardInterrupt:
         p.terminate()

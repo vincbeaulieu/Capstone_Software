@@ -2,7 +2,8 @@ from myoband.MyoBandData import read_myoband_data, get_myoband_data
 # from knn import train_classifier, get_predicted_movement
 # from lda import train_classifier, get_predicted_movement
 from archive.neuralnetwork import train_classifier, get_predicted_movement
-from rbpi.servoGestureOutput import motion, gestures_positions
+from rbpi.servoGestureOutput import motion
+from rbpi.gestures import gestures_positions
 import numpy as np
 import pandas as pd
 import multiprocessing

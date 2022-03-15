@@ -1,5 +1,5 @@
 
-from ml_class import train_model, myo_predict
+from ml_class import train_model, save_model
 
 # LDA Code:
 if __name__ == "__main__":
@@ -12,8 +12,12 @@ if __name__ == "__main__":
     dataset_name = "suyash10gpieday.csv"
     lda_model, lda_scaler = train_model(lda_model, dataset_name)
 
+    # Save the ML model
+    model_name = "lda_test"
+    save_model(lda_model, lda_scaler, model_name)
+
     # Use the ML model with the Myobands
-    myo_predict(lda_model, lda_scaler)
+    #myo_predict(lda_model, lda_scaler)
 
 
 
