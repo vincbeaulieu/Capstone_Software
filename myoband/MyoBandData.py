@@ -49,7 +49,16 @@ def read_myoband_data(q1, q2):
     print('device name: %s' % myo_1.read_attr(0x03).payload)
     print('device name: %s' % myo_2.read_attr(0x03).payload)
 
-    # qsize is broken on Mac and probably on Windows as well.
+    # qsize is broken on Mac.
+    # However, rewriting the method in the OS built-in library,
+    # such that it return the deque buffer length solve the issue.
+    # But is subject to report old data.
+
+    #def qsize(self):
+    #    # Raises NotImplementedError on Mac OSX because of broken sem_getvalue()
+    #    # return self._maxsize - self._sem._semlock._get_value()
+    #    return len(self._buffer) # Small Bug fix
+
     def add_to_queue_myo1(emg, movement):
         q1.put(emg)
         while q1.qsize > BUFFER_SIZE:

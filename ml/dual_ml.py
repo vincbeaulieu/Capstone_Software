@@ -38,13 +38,16 @@ if __name__ == "__main__":
 
         # Todo: concatenate values and k into a single string delimited by a comma
         if k in gestures[0:5]:
-            # FixME: This doesn't work
-            known.append(','.join(list([values[index], k])))
-            unknown.append(','.join(list([values[index], "handUnknown"])))
-        else:
-            known.append(','.join(list([values[index], "handUnknown"])))
-            unknown.append(','.join(list([values[index], k])))
+            print("I am k: " + str(k))
+            print(values.to)
 
+            # FixME: This doesn't work
+            # known.append(','.join(list([values[index], k])))
+            # unknown.append(','.join(list([values[index], "handUnknown"])))
+        else:
+            # known.append(','.join(list([values[index], "handUnknown"])))
+            # unknown.append(','.join(list([values[index], k])))
+            pass
         print(known)
 
     # Creating two KNN model
