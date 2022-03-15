@@ -33,11 +33,11 @@ def load_model(name="untitled"):
 
 
 # Trains classifier with the data in data_filepath (csv/<dataset>.csv)
-def train_model(model, dataset_path="../csv/dataset.csv"):
+def train_model(model, dataset_name="dataset.csv"):
     print("Starting model training...")
 
     # Extracting data from csv
-    dataset = pd.read_csv(dataset_path)
+    dataset = pd.read_csv("../csv/" + dataset_name)
     x = dataset.iloc[:, :-1].values
     y = dataset.iloc[:, -1].values
 
@@ -45,9 +45,9 @@ def train_model(model, dataset_path="../csv/dataset.csv"):
     x_train, x_test, y_train, y_test = train_test_split(x, y, test_size=0.1, random_state=1)
 
     # Scaling the data
-    sc = StandardScaler()
-    x_train = sc.fit_transform(x_train)
-    x_test = sc.transform(x_test)
+    scaler = StandardScaler()
+    x_train = scaler.fit_transform(x_train)
+    x_test = scaler.transform(x_test)
 
     # Training the model
     model.fit(x_train, y_train)
@@ -67,7 +67,7 @@ def train_model(model, dataset_path="../csv/dataset.csv"):
 
     # Returning the model
     print("Model training completed.")
-    return model, sc
+    return model, scaler
 
 
 def get_prediction(input_data, model, scaler):
@@ -76,22 +76,26 @@ def get_prediction(input_data, model, scaler):
     return prediction
 
 
+# Basic Machine Learning Structure:
 if __name__ == "__main__":
 
     # Import a ML library
     from sklearn.neighbors import KNeighborsClassifier
 
-    # Create a ML model
+    # Create the ML model
     knn_model = KNeighborsClassifier(n_neighbors=5, metric='minkowski', p=2)
 
-    # Load a ML model
-    # knn_model = load_model('../ml/saved_model')
-
     # Train the ML model
-    knn_model, knn_scaler = train_model(knn_model, "../csv/suyash10gpieday.csv")
+    dataset_name = "suyash10gpieday.csv"
+    knn_model, knn_scaler = train_model(knn_model, dataset_name)
 
     # Save the ML model
-    save_model(knn_model, knn_scaler, "knn_test")
+    model_name = "knn_test"
+    save_model(knn_model, knn_scaler, model_name)
+
+    # Load a ML model
+    model_name = "knn_test"
+    knn_model, knn_scaler = load_model(model_name)
 
     # Use the ML model
-    # get_prediction(emg_input, knn_model, knn_scaler)
+    # prediction = get_prediction(emg_input, knn_model, knn_scaler)
