@@ -1,20 +1,15 @@
+import time
+
 from sklearn.metrics import confusion_matrix, accuracy_score, f1_score
 from sklearn.model_selection import train_test_split
 from sklearn.neural_network import MLPClassifier
 import pandas as pd
-import pickle as pk
+
+
+import ml.general_ml as gml
 
 classifier = MLPClassifier(max_iter=2000)
-knn_filename = 'saved_model'
-
-
-def save_model(model, file_name):
-    with open(file_name, 'wb') as knn_file:
-        pk.dump(model, knn_file)
-
-
-def load_model(file_name):
-    return pk.load(open(file_name, 'rb'))
+knn_filename = 'ML/saved_model'
 
 
 def train_classifier(file_path):
@@ -38,7 +33,7 @@ def train_classifier(file_path):
     cm = confusion_matrix(y_test, y_pred)
     print(cm)
     print("accuracy:", accuracy_score(y_test, y_pred))
-    save_model(classifier, knn_filename)
+    gml.save_model(classifier, knn_filename)
     print("NN Classifier training complete.")
     return classifier
 
@@ -46,6 +41,8 @@ def train_classifier(file_path):
 def get_predicted_movement(emg, nn_classifier):
     emg_predicted = nn_classifier.predict(emg)
     return emg_predicted
+
+
 if __name__ == "__main__":
     train_classifier()
     print("Starting myoband")
@@ -56,8 +53,7 @@ if __name__ == "__main__":
         while True:
             input("Press enter to start")
             emg1, emg2 = get_myoband_data(q1, q2)
-            emg_data = []
-            emg_data.append(emg1 + emg2)
+            emg_data = [emg1 + emg2]
             predicted = get_predicted_movement(emg_data, sc, classifier)
             print(predicted)
             #motion(predicted)

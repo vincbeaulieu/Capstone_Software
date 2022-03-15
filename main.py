@@ -1,10 +1,8 @@
-import os
-
-from ml_training.MyoBandData import read_myoband_data, get_myoband_data
+from myoband.MyoBandData import read_myoband_data, get_myoband_data
 # from knn import train_classifier, get_predicted_movement
 # from lda import train_classifier, get_predicted_movement
-from neuralnetwork import train_classifier, get_predicted_movement
-from servoGestureOutput import motion, gestures_positions
+from archive.neuralnetwork import train_classifier, get_predicted_movement
+from rbpi.servoGestureOutput import motion, gestures_positions
 import numpy as np
 import pandas as pd
 import multiprocessing
@@ -47,7 +45,7 @@ GPIO.add_event_detect(10, GPIO.BOTH, callback=button, bouncetime=200)
 def test():
     global buttonStatus, gesture_counters
 
-    print("Starting Myoband connection...")
+    print("Starting myoband connection...")
     p = multiprocessing.Process(target=read_myoband_data, args=(q1, q2,))
 
     try:
