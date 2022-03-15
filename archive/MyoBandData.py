@@ -24,22 +24,12 @@ def myoband_setup(q, q_counter, addr):
     print(myo.bt.get_connections())
     print('device name: %s' % myo.read_attr(0x03).payload)
 
-    def push(queue, counter, data):
-        queue.put(data)
-        with counter.get_lock():
-            counter.value += 1
-
-    def pop(queue, counter):
-        with counter.get_lock():
-            counter.value -= 1
-        return queue.get()
-
-    # qsize is broken on Mac
+    # qsize is Not implemented on Mac
     def add_to_queue_myo(emg, movement):
         print(q_counter)
-        push(q, q_counter, emg)
-        while q_counter > BUFFER_SIZE:
-            pop(q, q_counter)
+        q.put(emg)
+        while q.qsize() > BUFFER_SIZE:
+            q.get()
 
     myo.add_emg_handler(add_to_queue_myo)
 
@@ -48,7 +38,7 @@ def myoband_setup(q, q_counter, addr):
 
     return myo
 
-def read_myoband_data(myo_1, myo_2=None):
+def read_myoband_data(myo_1, myo_2):
     try:
         while True:
             myo_1.run()
@@ -81,6 +71,7 @@ if __name__ == "__main__":
     q1_counter = multiprocessing.Value('i', 0)
     q2_counter = multiprocessing.Value('i', 0)
 
+    # Todo: while not connected:
     myo1 = myoband_setup(q_myo1, q1_counter, ADDRESS_MYO1)
     myo2 = myoband_setup(q_myo2, q2_counter, ADDRESS_MYO2)
 
@@ -95,7 +86,6 @@ if __name__ == "__main__":
         while count > 0:
             emg1, emg2 = get_myoband_data(q_myo1, q_myo2)
             emg_data = [emg1 + emg2]
-            # emg_data = np.concatenate((emg1, emg2), axis=None)
 
             emg_toto.append(emg_data)
 
