@@ -1,5 +1,5 @@
 from myoband.MyoBandData import read_myoband_data, get_myoband_data
-from ml_training.MyoBandData import read_myoband_data, get_myoband_data
+#from ml_training.MyoBandData import read_myoband_data, get_myoband_data
 # from knn import train_classifier, get_predicted_movement
 # from lda import train_classifier, get_predicted_movement
 from ml.ml_class import train_model, get_prediction
@@ -13,7 +13,7 @@ import RPi.GPIO as GPIO
 import os.path
 
 GPIO.setmode(GPIO.BCM)  # Use physical pin numbering
-GPIO.setup(10, GPIO.IN, pull_up_down=GPIO.PUD_DOWN)  # Set pin 10 to be an input pin
+GPIO.setup(15, GPIO.IN, pull_up_down=GPIO.PUD_DOWN)  # Set pin 10 to be an input pin
 
 from buttonTest import buttonStatus
 
@@ -25,7 +25,8 @@ gestures = list(gestures_positions.keys())
 gesture_counters = [0] * len(gestures)
 
 def test():
-    global buttonStatus, gesture_counters
+    global gesture_counters
+    buttonStatus(0)
 
     print("Starting myoband connection...")
     p = multiprocessing.Process(target=read_myoband_data, args=(q1, q2,))
@@ -49,15 +50,15 @@ def test():
 
         while True:
 
-            if buttonStatus in (1, 2):
+            if buttonStatus() in (1, 2):
                 try:
-                    if buttonStatus == 2:  # Then erase all the content of the file
+                    if buttonStatus() == 2:  # Then erase all the content of the file
                         with open(filepath, 'w') as file:
                             file.writelines("")
 
                     calibrate(filepath)
                     classifier = train_model(filepath)
-                    buttonStatus = 0
+                    buttonStatus(0)
                 except Exception as e:
                     print(e)
 
@@ -91,8 +92,6 @@ def test():
 # Creates the dataset in the csv folder. Returns the path of the file relative to
 # the top directory of the project (returns path like "csv/<filename>.csv)
 def calibrate(filepath):
-    global buttonStatus
-
     print("Starting data collection for calibration...")
     secs = 1
 
@@ -100,6 +99,9 @@ def calibrate(filepath):
         print('Please perform the following gesture: ' + str(gesture))
         motion(gesture)
 
+        while buttonStatus() != 1:
+            pass
+        buttonStatus(0)
 
         # TODO: light led up
 
@@ -123,7 +125,4 @@ def calibrate(filepath):
 
 
 if __name__ == '__main__':
-   #test()
-   while True:
-       sleep(0.5)
-       print(buttonStatus())
+    test()
