@@ -62,12 +62,12 @@ def read_myoband_data(q1, q2):
 
         def add_to_queue_myo1(emg, movement):
             q1.put(emg)
-            while q1.qsize > BUFFER_SIZE:
+            while q1.qsize() > BUFFER_SIZE:
                 q1.get()
 
         def add_to_queue_myo2(emg, movement):
             q2.put(emg)
-            while q2.qsize > BUFFER_SIZE:
+            while q2.qsize() > BUFFER_SIZE:
                 q2.get()
 
         myo_1.add_emg_handler(add_to_queue_myo1)
