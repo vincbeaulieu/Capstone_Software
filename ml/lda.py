@@ -1,5 +1,5 @@
 
-from ml_class import train_model, save_model
+from Capstone_Software.ml_class import train_model, save_model
 
 def lda_model():
     # Import and create a ML model
@@ -10,8 +10,7 @@ def lda_model():
 
 
 def svc_model():
-    from sklearn.svm import NuSVC, SVC
-    from sklearn.ensemble import BaggingClassifier
+    from sklearn.svm import NuSVC
 
     # Okay 43%
     return NuSVC(gamma="auto", random_state=1)
@@ -24,9 +23,7 @@ def svc_model():
 
 
 def tree_model():
-    from sklearn.ensemble import BaggingClassifier
-    from sklearn.ensemble import RandomForestClassifier, HistGradientBoostingClassifier, GradientBoostingClassifier
-    from sklearn.tree import DecisionTreeClassifier
+    from sklearn.ensemble import HistGradientBoostingClassifier
 
     # Best (very slow to train) 57%
     # return BaggingClassifier(HistGradientBoostingClassifier())
@@ -44,7 +41,6 @@ def tree_model():
     # return DecisionTreeClassifier()
 
 def knn_model():
-    from sklearn.ensemble import BaggingClassifier
     from sklearn.neighbors import KNeighborsClassifier
 
     # Okay 40%
