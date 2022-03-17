@@ -17,7 +17,7 @@ from rbpi.gestures import gestures_positions
 def ml_object(model_name, dataset_name=None, dataset_path=None):
     # Import and create a ML model
     from sklearn.ensemble import BaggingClassifier, HistGradientBoostingClassifier
-    #ml_model = BaggingClassifier(HistGradientBoostingClassifier())  # 80% - Stupid slow
+    # ml_model = BaggingClassifier(HistGradientBoostingClassifier())  # 80% - Stupid slow
     ml_model = HistGradientBoostingClassifier()  # 77% - Not very fast (need to be tested on the rbpi)
 
     # Train the ML model
@@ -36,6 +36,7 @@ def data_extractor(name, path="../csv/"):
     keys = dataset.iloc[:, -1].values
     return keys, values
 
+
 def data_divider(source_name="dataset.csv", destination_path="saved_model/datasets/"):
     # Creating the directory if it doesn't exist
     Path(destination_path).mkdir(parents=True, exist_ok=True)
@@ -51,7 +52,7 @@ def data_divider(source_name="dataset.csv", destination_path="saved_model/datase
     # print(gestures, random_gestures)
 
     # Reformat the dataset into 2 complementary sets
-    part = len(gestures)/2
+    part = int(len(gestures) / 2)
     for index, key in enumerate(keys):
         # ','.join(map(str, values[index])) + ',' + 'handUnknown'
         assigned = np.concatenate((values[index], key), axis=None)
@@ -72,7 +73,7 @@ def data_divider(source_name="dataset.csv", destination_path="saved_model/datase
     dataset_to_csv(ml_2, destination_path, "ml_2")
 
 
-# Dual ML as 80% accuracy
+# Dual ML has 80% accuracy
 if __name__ == "__main__":
     data_path = "saved_model/dual_ml/datasets/"
     data_name = "suyash10gpieday.csv"
@@ -95,7 +96,6 @@ if __name__ == "__main__":
     data_keys = keys_temp
     data_values = values_temp
 
-
     # Testing the model
     data_len = len(data_values)
     y_pred = [int] * data_len
@@ -116,21 +116,16 @@ if __name__ == "__main__":
 
         end = time.time()
         benchmark.append(end - start)
-
-        if i % 1000 == 0:
-            print()
-            print(sum(benchmark) / len(benchmark))
-
-        sys.stdout.write("\r{0} / {1}".format(i, data_len - 1))
+        average = sum(benchmark) / len(benchmark)
+        sys.stdout.write("\r{0} / {1} \t benchmark average = {2} (sec)".format(i, data_len - 1, average))
         sys.stdout.flush()
 
     sys.stdout.write("\n")
 
-    y_pred = np.array(y_pred)
-
+    # Display confusion matrix
     ConfusionMatrixDisplay.from_predictions(data_keys, y_pred)
     plt.show()
 
     # Printing the model accuracy
     model_accuracy = accuracy_score(data_keys, y_pred)
-    print("Accuracy: ", model_accuracy)
+    print("Total accuracy: ", model_accuracy)
