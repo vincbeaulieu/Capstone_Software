@@ -1,4 +1,5 @@
 from myoband.MyoBandData import read_myoband_data, get_myoband_data
+from ml_training.MyoBandData import read_myoband_data, get_myoband_data
 # from knn import train_classifier, get_predicted_movement
 # from lda import train_classifier, get_predicted_movement
 from ml.ml_class import train_model, get_prediction
@@ -14,35 +15,14 @@ import os.path
 GPIO.setmode(GPIO.BCM)  # Use physical pin numbering
 GPIO.setup(10, GPIO.IN, pull_up_down=GPIO.PUD_DOWN)  # Set pin 10 to be an input pin
 
+from buttonTest import buttonStatus
+
 q1 = multiprocessing.Queue()
 q2 = multiprocessing.Queue()
 q3 = []
 
 gestures = list(gestures_positions.keys())
 gesture_counters = [0] * len(gestures)
-
-
-buttonStatus = 0
-def button():
-    global buttonStatus
-    start = []
-
-    if GPIO.input(10) == 1:
-        start = time()
-
-    if GPIO.input(10) == 0:  # using "else" will improve performance
-        end = time()
-        elapsed = end - start
-
-        if elapsed >= 5:
-            buttonStatus = 2
-
-        elif elapsed >= .1:
-            buttonStatus = 1
-
-
-GPIO.add_event_detect(10, GPIO.BOTH, callback=button, bouncetime=200)
-
 
 def test():
     global buttonStatus, gesture_counters
@@ -120,9 +100,6 @@ def calibrate(filepath):
         print('Please perform the following gesture: ' + str(gesture))
         motion(gesture)
 
-        while buttonStatus != 1:
-            pass  # Wait button press
-        buttonStatus = 0
 
         # TODO: light led up
 
@@ -146,4 +123,7 @@ def calibrate(filepath):
 
 
 if __name__ == '__main__':
-    test()
+   #test()
+   while True:
+       sleep(0.5)
+       print(buttonStatus())
