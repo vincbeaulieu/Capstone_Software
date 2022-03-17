@@ -59,11 +59,10 @@ def evaluate_model(model, input_data, output_data, name="", path="saved_model/",
         print(str(fold) + "-fold cross validation score: ", scores)
 
 # Trains classifier with the data in data_filepath (csv/<dataset>.csv)
-def train_model(model, data_name="dataset.csv", data_path="../csv/", fold=None):
+def train_model(model, data_name="dataset.csv", data_path="csv/", fold=None):
     dataset_pathname = data_path + data_name
 
     print("Starting model training...")
-
     # Extracting data from csv
     dataset = pd.read_csv(dataset_pathname)
     x = dataset.iloc[:, :-1].values
