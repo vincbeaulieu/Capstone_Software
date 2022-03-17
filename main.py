@@ -8,6 +8,7 @@ import numpy as np
 import pandas as pd
 import multiprocessing
 from time import sleep, time
+import os.path
 import RPi.GPIO as GPIO
 
 GPIO.setmode(GPIO.BOARD)  # Use physical pin numbering
@@ -19,9 +20,9 @@ q3 = []
 
 gestures = list(gestures_positions.keys())
 gesture_counters = [0] * len(gestures)
-
-
 buttonStatus = 0
+
+
 def button():
     global buttonStatus
     start = []
@@ -40,10 +41,8 @@ def button():
             buttonStatus = 1
 
 
-GPIO.add_event_detect(10, GPIO.BOTH, callback=button, bouncetime=200)
-
-
 def test():
+    GPIO.add_event_detect(10, GPIO.BOTH, callback=button, bouncetime=200)
     global buttonStatus, gesture_counters
 
     print("Starting myoband connection...")
@@ -54,32 +53,29 @@ def test():
         sleep(5)
 
         filepath = "csv/dataset.csv"
-        num_lines = sum(1 for line in open(filepath))
-
-        # if there is less than 10 lines, we assume the file to be empty
-        if num_lines < 10:
-            # Therefore, calibration is initiated
-            try:
+        if os.path.isfile(filepath):
+            num_lines = sum(1 for line in open(filepath))
+            if num_lines < 100:
                 calibrate(filepath)
-            except Exception as e:
-                print(e)
+        else:
+            calibrate(filepath)
 
         classifier = train_model(filepath)
 
         while True:
-
+            print("In while")
             if buttonStatus in (1, 2):
+                print("in button if")
                 try:
                     if buttonStatus == 2:  # Then erase all the content of the file
                         with open(filepath, 'w') as file:
                             file.writelines("")
-
                     calibrate(filepath)
                     classifier = train_model(filepath)
                     buttonStatus = 0
                 except Exception as e:
                     print(e)
-
+            print("After button if")
             emg1, emg2 = get_myoband_data(q1, q2)
             emg_data = [emg1 + emg2]
             predicted = get_prediction(emg_data, classifier)
@@ -118,13 +114,14 @@ def calibrate(filepath):
     for gesture in gestures:
         print('Please perform the following gesture: ' + str(gesture))
         motion(gesture)
+        print("Press button when you are ready")
 
         while buttonStatus != 1:
             pass  # Wait button press
         buttonStatus = 0
 
         # TODO: light led up
-
+        print("Beginning collection for gesture:" + str(gesture))
         start_time = time()
         myo_data = []
         while time() - start_time < secs:
