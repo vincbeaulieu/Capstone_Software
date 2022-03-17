@@ -9,8 +9,9 @@ import pandas as pd
 import multiprocessing
 from time import sleep, time
 import RPi.GPIO as GPIO
+import os.path
 
-GPIO.setmode(GPIO.BOARD)  # Use physical pin numbering
+GPIO.setmode(GPIO.BCM)  # Use physical pin numbering
 GPIO.setup(10, GPIO.IN, pull_up_down=GPIO.PUD_DOWN)  # Set pin 10 to be an input pin
 
 q1 = multiprocessing.Queue()
@@ -54,7 +55,12 @@ def test():
         sleep(5)
 
         filepath = "csv/dataset.csv"
-        num_lines = sum(1 for line in open(filepath))
+        if os.path.isfile(filepath):
+            num_lines = sum(1 for line in open(filepath))
+            if num_lines < 100:
+                calibrate(filepath)
+        else:
+            calibrate(filepath)
 
         # if there is less than 10 lines, we assume the file to be empty
         if num_lines < 10:
