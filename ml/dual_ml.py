@@ -17,8 +17,8 @@ from rbpi.gestures import gestures_positions
 def ml_object(model_name, dataset_name=None, dataset_path=None):
     # Import and create a ML model
     from sklearn.ensemble import BaggingClassifier, HistGradientBoostingClassifier
-    ml_model = BaggingClassifier(HistGradientBoostingClassifier())  # 80% - Stupid slow
-    #ml_model = HistGradientBoostingClassifier()  # 77% - Not very fast (need to be tested on the rbpi)
+    #ml_model = BaggingClassifier(HistGradientBoostingClassifier())  # 80% - Stupid slow
+    ml_model = HistGradientBoostingClassifier()  # 77% - Not very fast (need to be tested on the rbpi)
 
     # Train the ML model
     ml_model, ml_scaler = train_model(ml_model, dataset_name, dataset_path)
