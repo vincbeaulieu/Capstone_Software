@@ -55,20 +55,15 @@ def test():
         sleep(5)
 
         filepath = "csv/dataset.csv"
-        if os.path.isfile(filepath):
-            num_lines = sum(1 for line in open(filepath))
-            if num_lines < 100:
+        try:
+            if os.path.isfile(filepath):
+                num_lines = sum(1 for line in open(filepath))
+                if num_lines < 100:
+                    calibrate(filepath)
+            else:
                 calibrate(filepath)
-        else:
-            calibrate(filepath)
-
-        # if there is less than 10 lines, we assume the file to be empty
-        if num_lines < 10:
-            # Therefore, calibration is initiated
-            try:
-                calibrate(filepath)
-            except Exception as e:
-                print(e)
+        except Exception as e:
+            print(e)
 
         classifier = train_model(filepath)
 
