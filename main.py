@@ -1,5 +1,4 @@
 from myoband.MyoBandData import read_myoband_data, get_myoband_data
-from ml_training.MyoBandData import read_myoband_data, get_myoband_data
 # from knn import train_classifier, get_predicted_movement
 # from lda import train_classifier, get_predicted_movement
 from ml.ml_class import train_model, get_prediction
@@ -19,33 +18,41 @@ from buttonTest import buttonStatus
 
 q1 = multiprocessing.Queue()
 q2 = multiprocessing.Queue()
-q3 = []
 
 gestures = list(gestures_positions.keys())
 gesture_counters = [0] * len(gestures)
 
+
 def test():
+    # Variable declarations:
     global buttonStatus, gesture_counters
+    q3 = []
+
+    # Defining filepath of the dataset (Will be simplified later tonight)
+    filepath = "csv/"
+    filename = "dataset.csv"
+    filepathname = filepath + filename
+    # Import and create a ML model
+    from sklearn.neighbors import KNeighborsClassifier
+    ml_model = KNeighborsClassifier(n_neighbors=5, metric='minkowski', p=2)
 
     print("Starting myoband connection...")
     p = multiprocessing.Process(target=read_myoband_data, args=(q1, q2,))
-
     try:
         p.start()
         sleep(5)
-
-        filepath = "csv/dataset.csv"
         try:
             if os.path.isfile(filepath):
                 num_lines = sum(1 for line in open(filepath))
                 if num_lines < 100:
                     calibrate(filepath)
             else:
-                calibrate(filepath)
+                # TODO: Load a ML model (For Vincent) ml_class is not completely ready testing is require before
+                pass
         except Exception as e:
             print(e)
 
-        classifier = train_model(filepath)
+        classifier, scaler = train_model(ml_model, filepath)
 
         while True:
 
@@ -55,15 +62,17 @@ def test():
                         with open(filepath, 'w') as file:
                             file.writelines("")
 
+                    # TODO: To simplified (Vincent)
                     calibrate(filepath)
-                    classifier = train_model(filepath)
+                    classifier, scaler = train_model(ml_model, filepath)
+                    
                     buttonStatus = 0
                 except Exception as e:
                     print(e)
 
             emg1, emg2 = get_myoband_data(q1, q2)
             emg_data = [emg1 + emg2]
-            predicted = get_prediction(emg_data, classifier)
+            predicted = get_prediction(emg_data, classifier, scaler)
 
             if len(q3) >= 15:
                 counter_index = gesture_counters.index(max(gesture_counters))
