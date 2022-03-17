@@ -1,5 +1,5 @@
+from Capstone_Software.ml.ml_class import train_model, save_model
 
-from Capstone_Software.ml_class import train_model, save_model
 
 def lda_model():
     # Import and create a ML model
