@@ -1,7 +1,7 @@
 from myoband.MyoBandData import read_myoband_data, get_myoband_data
 # from knn import train_classifier, get_predicted_movement
 # from lda import train_classifier, get_predicted_movement
-from archive.neuralnetwork import train_classifier, get_predicted_movement
+from ml.ml_class import train_model, get_prediction
 from rbpi.servoGestureOutput import motion
 from rbpi.gestures import gestures_positions
 import numpy as np
@@ -64,7 +64,7 @@ def test():
             except Exception as e:
                 print(e)
 
-        classifier = train_classifier(filepath)
+        classifier = train_model(filepath)
 
         while True:
 
@@ -75,14 +75,14 @@ def test():
                             file.writelines("")
 
                     calibrate(filepath)
-                    classifier = train_classifier(filepath)
+                    classifier = train_model(filepath)
                     buttonStatus = 0
                 except Exception as e:
                     print(e)
 
             emg1, emg2 = get_myoband_data(q1, q2)
             emg_data = [emg1 + emg2]
-            predicted = get_predicted_movement(emg_data, classifier)
+            predicted = get_prediction(emg_data, classifier)
 
             if len(q3) >= 15:
                 counter_index = gesture_counters.index(max(gesture_counters))

@@ -5,8 +5,7 @@ from sklearn.preprocessing import StandardScaler
 import pandas as pd
 import pickle as pk
 from pathlib import Path
-
-from myoband.MyoBandData import read_myoband_data, get_myoband_data
+from ..myoband.MyoBandData import read_myoband_data, get_myoband_data
 # from rbpi.servoGestureOutput import motion
 import multiprocessing
 
