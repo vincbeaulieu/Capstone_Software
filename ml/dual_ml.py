@@ -51,12 +51,12 @@ def data_divider(source_name="dataset.csv", destination_path="saved_model/datase
     # print(gestures, random_gestures)
 
     # Reformat the dataset into 2 complementary sets
-    part = int(len(gestures) / 2)
+    part = len(gestures)/2
     for index, key in enumerate(keys):
         # ','.join(map(str, values[index])) + ',' + 'handUnknown'
         assigned = np.concatenate((values[index], key), axis=None)
         if key == 'handPeace' or key == 'handRock':
-            pass
+            pass  # Do nothing
         elif key in gestures[0:part]:
             ml_1.append(assigned)
         else:
