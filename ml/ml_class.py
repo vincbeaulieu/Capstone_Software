@@ -1,19 +1,18 @@
 import matplotlib.pyplot as plt
-from sklearn.metrics import confusion_matrix, accuracy_score, plot_confusion_matrix
-from sklearn.model_selection import train_test_split
+from sklearn.metrics import confusion_matrix, accuracy_score, ConfusionMatrixDisplay
+from sklearn.model_selection import train_test_split, cross_val_score
 from sklearn.preprocessing import StandardScaler
 import pandas as pd
 import pickle as pk
 from pathlib import Path
 
 from myoband.MyoBandData import read_myoband_data, get_myoband_data
-from rbpi.servoGestureOutput import motion
+# from rbpi.servoGestureOutput import motion
 import multiprocessing
-from time import sleep
 
 
-def save_model(model, scaler, name="untitled"):
-    pathname = "saved_model/" + name
+def save_model(model, scaler, name="untitled", path="saved_model/"):
+    pathname = path + name
 
     # Creating a directory if it doesn't exist
     Path(pathname).mkdir(parents=True, exist_ok=True)
@@ -25,8 +24,8 @@ def save_model(model, scaler, name="untitled"):
     pk.dump(scaler, open(pathname + "/scaler.pkl", 'wb'))
 
 
-def load_model(name="untitled"):
-    pathname = "saved_model/" + name
+def load_model(name, path="saved_model/"):
+    pathname = path + name
 
     # Loading the model
     model = pk.load(open(pathname + "/model.pkl", 'rb'))
@@ -37,12 +36,37 @@ def load_model(name="untitled"):
     return model, scaler
 
 
+def evaluate_model(model, input_data, output_data, name="", path="saved_model/", fold=None):
+    # Testing the classifier by getting predictions
+    expected_output = model.predict(input_data)
+
+    # Displaying the confusion matrix
+    print(confusion_matrix(output_data, expected_output))
+    ConfusionMatrixDisplay.from_estimator(model, input_data, output_data)
+    # ConfusionMatrixDisplay.from_predictions(output_data, expected_output)
+
+    plt.title(name)
+    plt.savefig(path + 'confusion_matrix.png')
+    plt.show()
+
+    # Printing the model accuracy
+    model_accuracy = accuracy_score(output_data, expected_output)
+    print("Accuracy: ", model_accuracy)
+
+    # K-fold cross validation
+    if fold is not None:
+        scores = cross_val_score(model, input_data, output_data, cv=fold)
+        print("Cross validation average = ", scores.mean())
+        print(str(fold) + "-fold cross validation score: ", scores)
+
 # Trains classifier with the data in data_filepath (csv/<dataset>.csv)
-def train_model(model, dataset_name="dataset.csv"):
+def train_model(model, data_name="dataset.csv", data_path="../csv/", fold=None):
+    dataset_pathname = data_path + data_name
+
     print("Starting model training...")
 
     # Extracting data from csv
-    dataset = pd.read_csv("../csv/" + dataset_name)
+    dataset = pd.read_csv(dataset_pathname)
     x = dataset.iloc[:, :-1].values
     y = dataset.iloc[:, -1].values
 
@@ -57,18 +81,8 @@ def train_model(model, dataset_name="dataset.csv"):
     # Training the model
     model.fit(x_train, y_train)
 
-    # Testing the classifier by getting predictions
-    y_pred = model.predict(x_test)
-
-    # Displaying the confusion matrix
-    cm = confusion_matrix(y_test, y_pred)
-    print(cm)
-    plot_confusion_matrix(model, x_test, y_test)
-    plt.show()
-
-    # Printing the model accuracy
-    model_accuracy = accuracy_score(y_test, y_pred)
-    print("Accuracy: ", model_accuracy)
+    # Evaluating the model
+    evaluate_model(model, x_test, y_test, fold=fold)
 
     # Returning the model
     print("Model training completed.")
@@ -78,7 +92,8 @@ def train_model(model, dataset_name="dataset.csv"):
 def get_prediction(input_data, model, scaler):
     transformed_data = scaler.transform(input_data)
     prediction = model.predict(transformed_data)
-    return prediction
+    confidence = model.predict_proba(transformed_data)
+    return prediction, confidence
 
 
 def myo_predict(ml_model, ml_scaler):
@@ -88,10 +103,6 @@ def myo_predict(ml_model, ml_scaler):
     try:
         print("Starting myoband...")
         p.start()
-        sleep(5)
-
-        # Wait for user input
-        input("Press enter to start")
 
         while True:
             # Read data from EMG sensors
@@ -103,7 +114,7 @@ def myo_predict(ml_model, ml_scaler):
 
             # Display and Perform the predicted gesture
             print(prediction)
-            motion(prediction)
+            # motion(prediction)  # This line only work on the raspberry pi
 
     except KeyboardInterrupt:
         p.terminate()
@@ -112,26 +123,26 @@ def myo_predict(ml_model, ml_scaler):
 
 # Basic Machine Learning Structure:
 if __name__ == "__main__":
-    # Import a ML library
-    from sklearn.neighbors import KNeighborsClassifier
+    # Some model parameters
+    model_name = "knn_model"
 
-    # Create the ML model
-    knn_model = KNeighborsClassifier(n_neighbors=5, metric='minkowski', p=2)
+    # Import and create a ML model
+    from sklearn.neighbors import KNeighborsClassifier
+    ml_model = KNeighborsClassifier(n_neighbors=5, metric='minkowski', p=2)
 
     # Train the ML model
     dataset_name = "suyash10gpieday.csv"
-    knn_model, knn_scaler = train_model(knn_model, dataset_name)
+    ml_model, ml_scaler = train_model(ml_model, dataset_name, fold=10)
 
     # Save the ML model
-    model_name = "knn_test"
-    save_model(knn_model, knn_scaler, model_name)
+    save_model(ml_model, ml_scaler, name=model_name)
 
     # Load a ML model
-    model_name = "knn_test"
-    knn_model, knn_scaler = load_model(model_name)
+    ml_model, ml_scaler = load_model(model_name)
 
     # Use the ML model
     # prediction = get_prediction(input_data, knn_model, knn_scaler)
 
     # Use the ML model with the Myobands
-    myo_predict(knn_model, knn_scaler)
+    myo_predict(ml_model, ml_scaler)
+

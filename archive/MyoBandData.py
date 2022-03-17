@@ -1,4 +1,5 @@
 import multiprocessing
+import sys
 from time import sleep
 from pyomyo import Myo, emg_mode
 import pandas as pd
@@ -15,7 +16,7 @@ def get_myoband_data(q1, q2):
     emg_2 = list(q2.get())
     return emg_1, emg_2
 
-def myoband_setup(q, q_counter, addr):
+def myoband_setup(q, addr):
     BUFFER_SIZE = 5
 
     # To change the mode of data, edit mode=emg_mode.<YourMode>
@@ -24,9 +25,9 @@ def myoband_setup(q, q_counter, addr):
     print(myo.bt.get_connections())
     print('device name: %s' % myo.read_attr(0x03).payload)
 
-    # qsize is Not implemented on Mac
+    # qsize raises a NotImplementedError on Mac OSX because of broken sem_getvalue()
+    # This can be solved by returning the internal deque buffer length in the built-in library
     def add_to_queue_myo(emg, movement):
-        print(q_counter)
         q.put(emg)
         while q.qsize() > BUFFER_SIZE:
             q.get()
@@ -38,6 +39,7 @@ def myoband_setup(q, q_counter, addr):
 
     return myo
 
+
 def read_myoband_data(myo_1, myo_2):
     try:
         while True:
@@ -48,32 +50,14 @@ def read_myoband_data(myo_1, myo_2):
         myo_2.disconnect()
 
 
-
-
-
-# queue.Queue was built for threading, using in-memory locks.
-# In a Multiprocess environment, each subprocess would get
-# it's own copy of a queue.Queue() instance in their own memory
-# space, since subprocesses don't share memory (mostly).
-# https://stackoverflow.com/questions/9908781/sharing-a-result-queue-among-several-processes
-
 if __name__ == "__main__":
-    # To use the methods:
-    # declare globally, q = multiprocessing.Queue()
-    # In the main, add the following lines in a try block:
-    # p = multiprocessing.Process(target=read_myoband_data, args=(q,))
-    # p.start()
-    # To get the latest value: call get_myoband_data(q) where q is the multiprocessing.Queue()
 
     q_myo1 = multiprocessing.Queue()
     q_myo2 = multiprocessing.Queue()
 
-    q1_counter = multiprocessing.Value('i', 0)
-    q2_counter = multiprocessing.Value('i', 0)
-
     # Todo: while not connected:
-    myo1 = myoband_setup(q_myo1, q1_counter, ADDRESS_MYO1)
-    myo2 = myoband_setup(q_myo2, q2_counter, ADDRESS_MYO2)
+    myo1 = myoband_setup(q_myo1, ADDRESS_MYO1)
+    myo2 = myoband_setup(q_myo2, ADDRESS_MYO2)
 
     p1 = multiprocessing.Process(target=read_myoband_data, args=(myo1, myo2,))
     try:
