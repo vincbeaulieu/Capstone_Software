@@ -46,8 +46,13 @@ def test():
                 num_lines = sum(1 for line in open(filepath))
                 if num_lines < 100:
                     calibrate(filepath)
+                else:
+                    # File is already populated. Therefore, load a model
+                    # TODO: Load a ML model (For Vincent) ml_class is not completely ready testing is require before
+                    pass
             else:
-                # TODO: Load a ML model (For Vincent) ml_class is not completely ready testing is require before
+                # if file doesn't exist
+                calibrate(filepath)
                 pass
         except Exception as e:
             print(e)
