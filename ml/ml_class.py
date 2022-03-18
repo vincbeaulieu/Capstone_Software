@@ -10,6 +10,28 @@ from myoband.MyoBandData import read_myoband_data, get_myoband_data
 import multiprocessing
 
 
+class ml_object:
+    # Dataset location used for training
+    source_path = "../csv/"
+    source_name = "dataset.csv"
+    source_pathname = source_path + source_name
+
+    # Save and load location
+    model_name = "untitled"
+    model_path = "saved_model/"
+    model_pathname = model_path + model_name
+
+    # ML Classifier
+    model = None
+    scaler = None
+
+    # Some Stats
+    accuracy = None
+    scores = None
+    score = None
+    fold = None
+
+
 def save_model(model, scaler, name="untitled", path="saved_model/"):
     pathname = path + name
 
@@ -57,6 +79,7 @@ def evaluate_model(model, input_data, output_data, name="", path="saved_model/",
         scores = cross_val_score(model, input_data, output_data, cv=fold)
         print("Cross validation average = ", scores.mean())
         print(str(fold) + "-fold cross validation score: ", scores)
+
 
 # Trains classifier with the data in data_filepath (csv/<dataset>.csv)
 def train_model(model, data_name="dataset.csv", data_path="../csv/", fold=None):
@@ -119,8 +142,7 @@ def myo_predict(ml_model, ml_scaler):
         p.join()
 
 
-# Basic Machine Learning Structure:
-if __name__ == "__main__":
+def launch():
     # Some model parameters
     model_name = "knn_model"
 
@@ -144,3 +166,13 @@ if __name__ == "__main__":
     # Use the ML model with the Myobands
     myo_predict(ml_model, ml_scaler)
 
+
+import os
+
+# Basic Machine Learning Structure:
+if __name__ == "__main__":
+    # launch()
+    pathname = "../csv/suyash10gpieday.csv"
+    if os.path.isfile(pathname):
+        print("file exist")
+    print(Path(pathname).parts[:])

@@ -29,7 +29,7 @@ def print_error(exception):
     print(_RED_ + str(exception) + _END_)
 
 
-def test():
+def launch():
     # Variable declarations:
     global gesture_counters
     q3 = []
@@ -136,7 +136,7 @@ def calibrate(filepath):
 
 
 if __name__ == '__main__':
-    test()
+    launch()
 
     pass
 
