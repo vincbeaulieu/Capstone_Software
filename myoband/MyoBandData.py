@@ -21,7 +21,7 @@ def get_myoband_data(q1, q2):
 #     myo = Myo(mode=emg_mode.RAW)
 #     myo.connect(addr)
 #     print(myo.bt.get_connections())
-#     print('device name: %s' % myo.read_attr(0x03).payload)
+#     print('device model_dirname: %s' % myo.read_attr(0x03).payload)
 #
 #     # qsize is broken on Mac and probably on Windows as well.
 #     def add_to_queue_myo(emg, movement):
@@ -47,8 +47,8 @@ def read_myoband_data(q1, q2):
         print(myo_2.bt.get_connections())
 
         # Todo: check what the output print when connected, and check the output when disconnected
-        print('device name: %s' % myo_1.read_attr(0x03).payload)
-        print('device name: %s' % myo_2.read_attr(0x03).payload)
+        print('device model_dirname: %s' % myo_1.read_attr(0x03).payload)
+        print('device model_dirname: %s' % myo_2.read_attr(0x03).payload)
 
         # qsize is broken on Mac.
         # However, rewriting the method in the OS built-in library,

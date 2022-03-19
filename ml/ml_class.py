@@ -10,86 +10,75 @@ from myoband.MyoBandData import read_myoband_data, get_myoband_data
 import multiprocessing
 
 
-class ml_object:
-    # Dataset location used for training
-    source_path = "../csv/"
-    source_name = "dataset.csv"
-    source_pathname = source_path + source_name
-
-    # Save and load location
-    model_name = "untitled"
-    model_path = "saved_model/"
-    model_pathname = model_path + model_name
-
-    # ML Classifier
-    model = None
-    scaler = None
-
-    # Some Stats
-    accuracy = None
-    scores = None
-    score = None
-    fold = None
+# Save and load location
+_save_dir = "saved_model/"
 
 
-def save_model(model, scaler, name="untitled", path="saved_model/"):
-    pathname = path + name
+# Save reformatted dataset to csv
+def dataset_to_csv(datalist, path):
+    Path(_save_dir + path).mkdir(parents=True, exist_ok=True)
+    pathname = _save_dir + path + "/dataset.csv"
+    df = pd.DataFrame(datalist)
+    df.to_csv(pathname, index=False, header=False, mode='w')
+
+
+def save_model(ml_object, model_dirname="untitled"):
+    model, scaler = ml_object
+    pathname = _save_dir + model_dirname
 
     # Creating a directory if it doesn't exist
     Path(pathname).mkdir(parents=True, exist_ok=True)
 
-    # Saving the model
+    # Saving the model and the scaler
     pk.dump(model, open(pathname + "/model.pkl", 'wb'))
-
-    # Saving the scaler
     pk.dump(scaler, open(pathname + "/scaler.pkl", 'wb'))
 
 
-def load_model(name, path="saved_model/"):
-    pathname = path + name
+def load_model(model_dirname):
+    pathname = _save_dir + model_dirname
 
-    # Loading the model
+    # Loading the model and the scaler
     model = pk.load(open(pathname + "/model.pkl", 'rb'))
-
-    # Loading the scaler
     scaler = pk.load(open(pathname + "/scaler.pkl", 'rb'))
 
     return model, scaler
 
 
-def evaluate_model(model, input_data, output_data, name="", path="saved_model/", fold=None):
+def evaluate_model(ml_object, input_data, output_data, model_dirname="", fold=None):
+    model, scaler = ml_object
     # Testing the classifier by getting predictions
-    expected_output = model.predict(input_data)
+    predicted_output = model.predict(input_data)
 
     # Displaying the confusion matrix
-    print(confusion_matrix(output_data, expected_output))
-    ConfusionMatrixDisplay.from_estimator(model, input_data, output_data)
-    # ConfusionMatrixDisplay.from_predictions(output_data, expected_output)
+    print(confusion_matrix(output_data, predicted_output))
+    ConfusionMatrixDisplay.from_predictions(output_data, predicted_output)
 
-    plt.title(name)
-    plt.savefig(path + 'confusion_matrix.png')
+    plt.title(model_dirname)
+    Path(_save_dir + model_dirname).mkdir(parents=True, exist_ok=True)
+    plt.savefig(_save_dir + model_dirname + '/confusion_matrix.png')
     plt.show()
 
-    # Printing the model accuracy
-    model_accuracy = accuracy_score(output_data, expected_output)
-    print("Accuracy: ", model_accuracy)
-
-    # K-fold cross validation
+    accuracy = accuracy_score(output_data, predicted_output)
+    score, scores = None, None
     if fold is not None:
+        # K-fold cross validation
         scores = cross_val_score(model, input_data, output_data, cv=fold)
-        print("Cross validation average = ", scores.mean())
-        print(str(fold) + "-fold cross validation score: ", scores)
+        score = scores.mean()
+    return accuracy, score, scores
+
+
+def data_extractor(dataset_path):
+    # Extracting data from csv
+    dataset = pd.read_csv(dataset_path)
+    in_data = dataset.iloc[:, :-1].values
+    out_data = dataset.iloc[:, -1].values
+    return in_data, out_data
 
 
 # Trains classifier with the data in data_filepath (csv/<dataset>.csv)
-def train_model(model, data_name="dataset.csv", data_path="../csv/", fold=None):
-    dataset_pathname = data_path + data_name
-
-    print("Starting model training...")
+def train_model(model, data_path="../csv/dataset.csv"):
     # Extracting data from csv
-    dataset = pd.read_csv(dataset_pathname)
-    x = dataset.iloc[:, :-1].values
-    y = dataset.iloc[:, -1].values
+    x, y = data_extractor(data_path)
 
     # Splitting the dataset into training_set and test_set
     x_train, x_test, y_train, y_test = train_test_split(x, y, test_size=0.1, random_state=1)
@@ -102,22 +91,21 @@ def train_model(model, data_name="dataset.csv", data_path="../csv/", fold=None):
     # Training the model
     model.fit(x_train, y_train)
 
-    # Evaluating the model
-    evaluate_model(model, x_test, y_test, fold=fold)
-
-    # Returning the model
-    print("Model training completed.")
-    return model, scaler
+    # Returning the model and dataset
+    return [model, scaler], [x_train, x_test, y_train, y_test]
 
 
-def get_prediction(input_data, model, scaler):
+def get_prediction(input_data, ml_object):
+    model, scaler = ml_object
     transformed_data = scaler.transform(input_data)
     prediction = model.predict(transformed_data)
     confidence = model.predict_proba(transformed_data)
     return prediction, confidence
 
 
-def myo_predict(ml_model, ml_scaler):
+def myo_predict(ml_object):
+    model, scaler = ml_object
+
     q1 = multiprocessing.Queue()
     q2 = multiprocessing.Queue()
     p = multiprocessing.Process(target=read_myoband_data, args=(q1, q2,))
@@ -131,7 +119,7 @@ def myo_predict(ml_model, ml_scaler):
             emg_data = [emg1 + emg2]
 
             # Use the ML model on the EMG data
-            prediction = get_prediction(emg_data, ml_model, ml_scaler)
+            prediction = get_prediction(emg_data, ml_object)
 
             # Display and Perform the predicted gesture
             print(prediction)
@@ -142,37 +130,32 @@ def myo_predict(ml_model, ml_scaler):
         p.join()
 
 
+# Basic Machine Learning Structure:
 def launch():
-    # Some model parameters
-    model_name = "knn_model"
 
     # Import and create a ML model
     from sklearn.neighbors import KNeighborsClassifier
     ml_model = KNeighborsClassifier(n_neighbors=5, metric='minkowski', p=2)
 
     # Train the ML model
-    dataset_name = "suyash10gpieday.csv"
-    ml_model, ml_scaler = train_model(ml_model, dataset_name, fold=10)
+    dataset_path = "../csv/suyash10gpieday.csv"
+    ml_object, dataset = train_model(ml_model, dataset_path)
+    in_train, in_test, out_train, out_test = dataset
 
-    # Save the ML model
-    save_model(ml_model, ml_scaler, name=model_name)
+    # Evaluating the model
+    results = evaluate_model(ml_object, in_test, out_test, fold=3)
+    print(results)
 
-    # Load a ML model
-    ml_model, ml_scaler = load_model(model_name)
+    # Save or Load the ML model
+    model_name = "knn_model"
+    save_model(ml_object, model_dirname=model_name)
+    ml_object = load_model(model_name)
 
-    # Use the ML model
+    # Use the ML model in stand alone or with the Myobands
     # prediction = get_prediction(input_data, knn_model, knn_scaler)
-
-    # Use the ML model with the Myobands
-    myo_predict(ml_model, ml_scaler)
+    myo_predict(ml_object)
 
 
-import os
-
-# Basic Machine Learning Structure:
 if __name__ == "__main__":
-    # launch()
-    pathname = "../csv/suyash10gpieday.csv"
-    if os.path.isfile(pathname):
-        print("file exist")
-    print(Path(pathname).parts[:])
+    launch()
+

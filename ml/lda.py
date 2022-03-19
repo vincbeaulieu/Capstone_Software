@@ -71,7 +71,7 @@ if __name__ == "__main__":
     save_model(ml_model, ml_scaler, model_name)
 
     # Use the ML model with the Myobands
-    #myo_predict(ml_model, ml_scaler)
+    #myo_predict(model, scaler)
 
 
 

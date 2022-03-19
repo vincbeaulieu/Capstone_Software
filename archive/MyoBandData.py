@@ -23,7 +23,7 @@ def myoband_setup(q, addr):
     myo = Myo(mode=emg_mode.RAW)
     myo.connect(addr)
     print(myo.bt.get_connections())
-    print('device name: %s' % myo.read_attr(0x03).payload)
+    print('device model_dirname: %s' % myo.read_attr(0x03).payload)
 
     # qsize raises a NotImplementedError on Mac OSX because of broken sem_getvalue()
     # This can be solved by returning the internal deque buffer length in the built-in library

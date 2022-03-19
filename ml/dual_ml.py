@@ -1,7 +1,5 @@
 import sys
 import time
-from copy import deepcopy
-from random import shuffle
 
 import matplotlib.pyplot as plt
 import numpy as np
@@ -9,105 +7,76 @@ import pandas as pd
 from pathlib import Path
 
 from sklearn.metrics import ConfusionMatrixDisplay, accuracy_score
+from sklearn.model_selection import train_test_split
 
-from ml.ml_class import train_model, save_model, get_prediction
+from ml.ml_class import train_model, save_model, get_prediction, data_extractor, dataset_to_csv
+from MLObject import MLObject
+
 from rbpi.gestures import gestures_positions
+handRemoved = ['handPeace', 'handRock']
 
 
-def ml_object(model_name, dataset_name=None, dataset_path=None):
-    # Import and create a ML model
-    from sklearn.ensemble import BaggingClassifier, HistGradientBoostingClassifier
-    # ml_model = BaggingClassifier(HistGradientBoostingClassifier())  # 80% - Stupid slow
-    ml_model = HistGradientBoostingClassifier()  # 77% - Not very fast (need to be tested on the rbpi)
+# Save and load location
+_save_dir = "saved_model/"
 
-    # Train the ML model
-    ml_model, ml_scaler = train_model(ml_model, dataset_name, dataset_path)
-
-    # Save the ML model
-    save_model(ml_model, ml_scaler, model_name)
-
-    return ml_model, ml_scaler
-
-
-def data_extractor(name, path="../csv/"):
-    # Extracting data from csv
-    dataset = pd.read_csv(path + name)
-    values = dataset.iloc[:, :-1].values
-    keys = dataset.iloc[:, -1].values
-    return keys, values
-
-
-def data_divider(source_name="dataset.csv", destination_path="saved_model/datasets/"):
-    # Creating the directory if it doesn't exist
-    Path(destination_path).mkdir(parents=True, exist_ok=True)
+def data_divider(source_dir='../csv/dataset.csv'):
 
     gestures = list(gestures_positions.keys())
 
     # Extracting data from csv
-    keys, values = data_extractor(source_name)
-
-    ml_1 = []
-    ml_2 = []
-
-    # print(gestures, random_gestures)
+    values, keys = data_extractor(source_dir)
 
     # Reformat the dataset into 2 complementary sets
+    ml_1, ml_2 = [], []
     part = int(len(gestures) / 2)
     for index, key in enumerate(keys):
-        # ','.join(map(str, values[index])) + ',' + 'handUnknown'
         assigned = np.concatenate((values[index], key), axis=None)
-        if key == 'handPeace' or key == 'handRock':
+        if key in handRemoved:
             pass  # Do nothing
         elif key in gestures[0:part]:
             ml_1.append(assigned)
         else:
             ml_2.append(assigned)
 
-    # Save reformatted dataset to csv
-    def dataset_to_csv(datalist, path, name):
-        pathname = path + name
-        df = pd.DataFrame(datalist)
-        df.to_csv(pathname, index=False, header=False, mode='w')
+    dataset_to_csv(ml_1, "dual_ml/ml_1")
+    dataset_to_csv(ml_2, "dual_ml/ml_2")
 
-    dataset_to_csv(ml_1, destination_path, "ml_1")
-    dataset_to_csv(ml_2, destination_path, "ml_2")
+
+def data_remover(dataset_path):
+    _data_values, _data_keys = data_extractor(dataset_path)
+    values_temp, keys_temp = [], []
+    for i, data_key in enumerate(_data_keys):
+        if not(data_key in handRemoved):
+            keys_temp.append(_data_keys[i])
+            values_temp.append(_data_values[i])
+    return values_temp, keys_temp
 
 
 # Dual ML has 80% accuracy
 if __name__ == "__main__":
-    data_path = "saved_model/dual_ml/datasets/"
-    data_name = "suyash10gpieday.csv"
 
-    data_divider(data_name, data_path)
+    # Split the original dataset
+    dataset_path = "../csv/suyash10gpieday.csv"
+    data_divider(dataset_path)
 
     # Creating many ML models
-    model_1, scaler_1 = ml_object("dual_ml/ml_1", dataset_name="ml_1", dataset_path=data_path)
-    model_2, scaler_2 = ml_object("dual_ml/ml_2", dataset_name="ml_2", dataset_path=data_path)
+    ml_obj_1 = MLObject("dual_ml/ml_1", _save_dir + "dual_ml/ml_1/dataset.csv").train().evaluate().save()
+    ml_obj_2 = MLObject("dual_ml/ml_2", _save_dir + "dual_ml/ml_2/dataset.csv").train().evaluate().save()
 
-    data_keys, data_values = data_extractor(data_name)
-    keys_temp = []
-    values_temp = []
-    for i, data_key in enumerate(data_keys):
-        if data_key == 'handPeace' or data_key == 'handRock':
-            pass
-        else:
-            keys_temp.append(data_keys[i])
-            values_temp.append(data_values[i])
-    data_keys = keys_temp
-    data_values = values_temp
+    # Reformat dataset by removing exclusion
+    x_test, y_test = data_remover(dataset_path)
 
     # Testing the model
-    data_len = len(data_values)
+    data_len = len(x_test)
     y_pred = [int] * data_len
-
     benchmark = []
 
     for i in range(data_len):
         start = time.time()
 
-        data_value = [data_values[i]]
-        pred_1, conf_1 = get_prediction(data_value, model_1, scaler_1)
-        pred_2, conf_2 = get_prediction(data_value, model_2, scaler_2)
+        x_true = [x_test[i]]
+        pred_1, conf_1 = ml_obj_1.predict(x_true)
+        pred_2, conf_2 = ml_obj_2.predict(x_true)
 
         if max(conf_1[0]) > max(conf_2[0]):
             y_pred[i] = pred_1
@@ -123,9 +92,9 @@ if __name__ == "__main__":
     sys.stdout.write("\n")
 
     # Display confusion matrix
-    ConfusionMatrixDisplay.from_predictions(data_keys, y_pred)
+    ConfusionMatrixDisplay.from_predictions(y_test, y_pred)
     plt.show()
 
     # Printing the model accuracy
-    model_accuracy = accuracy_score(data_keys, y_pred)
+    model_accuracy = accuracy_score(y_test, y_pred)
     print("Total accuracy: ", model_accuracy)
