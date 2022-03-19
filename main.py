@@ -1,3 +1,4 @@
+import buttonTest
 from myoband.MyoBandData import read_myoband_data, get_myoband_data
 # from knn import train_classifier, get_predicted_movement
 # from lda import train_classifier, get_predicted_movement
@@ -14,7 +15,7 @@ import os.path
 GPIO.setmode(GPIO.BCM)  # Use physical pin numbering
 GPIO.setup(10, GPIO.IN, pull_up_down=GPIO.PUD_DOWN)  # Set pin 10 to be an input pin
 
-from buttonTest import buttonStatus
+import buttonTest
 
 q1 = multiprocessing.Queue()
 q2 = multiprocessing.Queue()
@@ -25,7 +26,7 @@ gesture_counters = [0] * len(gestures)
 
 def test():
     # Variable declarations:
-    global buttonStatus, gesture_counters
+    global gesture_counters
     q3 = []
 
     # Defining filepath of the dataset (Will be simplified later tonight)
@@ -62,9 +63,9 @@ def test():
         print("train_model done")
         while True:
 
-            if buttonStatus in (1, 2):
+            if buttonTest.button_state in range (1, 2):
                 try:
-                    if buttonStatus == 2:  # Then erase all the content of the file
+                    if buttonTest.button_state == 2:  # Then erase all the content of the file
                         with open(filepath, 'w') as file:
                             file.writelines("")
 
