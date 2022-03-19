@@ -68,7 +68,8 @@ class MLObject:
         return self
 
     def predict(self, input_data):
-        return get_prediction(input_data, self.ml_object)
+        pred, conf = get_prediction(input_data, self.ml_object)
+        return pred, conf
 
 
 if __name__ == "__main__":
