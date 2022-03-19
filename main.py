@@ -43,17 +43,18 @@ def test():
         p.start()
         sleep(5)
         try:
-            if os.path.isfile(filepath):
-                num_lines = sum(1 for line in open(filepath))
+            print('>>> PATH: ' + filepathname)
+            if os.path.isfile(filepathname):
+                num_lines = sum(1 for line in open(filepathname))
                 if num_lines < 100:
-                    calibrate(filepath)
+                    calibrate(filepathname)
                 else:
                     # File is already populated. Therefore, load a model
                     # TODO: Load a ML model (For Vincent) ml_class is not completely ready testing is require before
                     pass
             else:
                 # if file doesn't exist
-                calibrate(filepath)
+                calibrate(filepathname)
                 pass
         except Exception as e:
             print(e)
@@ -66,11 +67,11 @@ def test():
             if buttonTest.button_state in range (1, 2):
                 try:
                     if buttonTest.button_state == 2:  # Then erase all the content of the file
-                        with open(filepath, 'w') as file:
+                        with open(filepathname, 'w') as file:
                             file.writelines("")
 
                     # TODO: To simplified (Vincent)
-                    calibrate(filepath)
+                    calibrate(filepathname)
                     classifier, scaler = train_model(ml_model, filename)
                     
                     buttonStatus = 0
