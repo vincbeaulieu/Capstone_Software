@@ -117,8 +117,9 @@ def calibrate(filepath):
         print('Please perform the following gesture: ' + str(gesture))
         motion(gesture)
 
+        sleep(1)
 
-        # TODO: light led up
+        print('start gesture')# TODO: replace with light led up
 
         start_time = time()
         myo_data = []
@@ -133,7 +134,7 @@ def calibrate(filepath):
         df = pd.DataFrame(myo_data)
         df.to_csv(filepath, index=False, header=False, mode='a')
 
-        # TODO: close led
+        print('end gesture')# TODO: replace with close led
 
     # TODO: LED blink twice
     print("Data collection complete. Dataset file created")
