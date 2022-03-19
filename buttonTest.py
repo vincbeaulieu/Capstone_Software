@@ -35,10 +35,10 @@ def my_callback(channel):
         elapsed = time() - start
         print(elapsed)
 
-        if elapsed >= 3:
+        if elapsed >= 5:
             buttonStatus(2)
             print("Button was pushed for a while!")
-        elif elapsed >= .1:
+        elif elapsed >= 2:
             buttonStatus(1)
             print("Button was pushed")
         else:
