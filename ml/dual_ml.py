@@ -93,9 +93,9 @@ if __name__ == "__main__":
     _data_values, y_pred = data_extractor(_save_dir + "dual_ml/predictions/dataset.csv")
 
     # Display confusion matrix
-    ConfusionMatrixDisplay.from_predictions(_data_keys, y_pred)
+    ConfusionMatrixDisplay.from_predictions(_data_keys[:-1], y_pred)
     plt.show()
 
     # Printing the model accuracy
-    model_accuracy = accuracy_score(_data_keys, y_pred)
+    model_accuracy = accuracy_score(_data_keys[:-1], y_pred)
     print("Total accuracy: ", model_accuracy)
