@@ -10,7 +10,7 @@ from myoband.MyoBandData import read_myoband_data, get_myoband_data
 import multiprocessing
 
 
-def save_model(model, scaler, name="untitled", path="saved_model/"):
+def save_model(model, scaler, name="untitled", path="ml/saved_model/"):
     pathname = path + name
 
     # Creating a directory if it doesn't exist
@@ -35,7 +35,7 @@ def load_model(name, path="saved_model/"):
     return model, scaler
 
 
-def evaluate_model(model, input_data, output_data, name="", path="saved_model/", fold=None):
+def evaluate_model(model, input_data, output_data, name="", path="ml/saved_model/", fold=None):
     # Testing the classifier by getting predictions
     expected_output = model.predict(input_data)
 

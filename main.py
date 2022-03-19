@@ -57,8 +57,9 @@ def test():
         except Exception as e:
             print(e)
 
-        classifier, scaler = train_model(ml_model, filepath)
+        classifier, scaler = train_model(ml_model, filename)
 
+        print("train_model done")
         while True:
 
             if buttonStatus in (1, 2):
@@ -69,7 +70,7 @@ def test():
 
                     # TODO: To simplified (Vincent)
                     calibrate(filepath)
-                    classifier, scaler = train_model(ml_model, filepath)
+                    classifier, scaler = train_model(ml_model, filename)
                     
                     buttonStatus = 0
                 except Exception as e:
@@ -137,7 +138,7 @@ def calibrate(filepath):
 
 
 if __name__ == '__main__':
-   #test()
-   while True:
-       sleep(0.5)
-       print(buttonStatus())
+   test()
+#    while True:
+#        sleep(0.5)
+#        print(buttonStatus())
