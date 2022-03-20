@@ -77,13 +77,16 @@ def ml_gen(_data_values, _data_keys, group_size=5, ml_qty=3):
     return ml_objects, ml_groups
 
 
-def predict(in_data, ml_qty=3):
+def predict(in_data, ml_qty=3, ml_groups=None):
     _pred, _conf = [], []
     for j in range(ml_qty):
         tmp_pred, tmp_conf = ml_objects[j].predict(in_data)
         _pred.append(tmp_pred)
         _conf.append(tmp_conf)
 
+    # FIXME: Will lead to false positive when one of the ml lack gesture diversity
+    # TODO: Could be resolved by calculating the sum of all conf for each gesture and using the highest sum
+    # However, each conf gesture must all have the same number of input, and all gestures must be represented equally
     k_winner, best_conf = 0, 0
     for k in range(ml_qty):
         max_conf = max(_conf[k][0])
@@ -104,33 +107,33 @@ def data_remover(_data_values, _data_keys):
 
 def cpu_limit():
     # For some reason, limiting Python to a single thread improve speed by a lot
-    os.environ["OMP_NUM_THREADS"] = "1"  # export OMP_NUM_THREADS=4
-    os.environ["OPENBLAS_NUM_THREADS"] = "1"  # export OPENBLAS_NUM_THREADS=4
-    os.environ["MKL_NUM_THREADS"] = "1"  # export MKL_NUM_THREADS=6
-    os.environ["VECLIB_MAXIMUM_THREADS"] = "1"  # export VECLIB_MAXIMUM_THREADS=4
-    os.environ["NUMEXPR_NUM_THREADS"] = "1"  # export NUMEXPR_NUM_THREADS=6
-    os.environ["BLIS_NUM_THREADS"] = "1"
-    os.environ["NUMBER_OF_PROCESSORS"] = "1"
+    os.environ["OMP_NUM_THREADS"] = "16"  # export OMP_NUM_THREADS=4
+    os.environ["OPENBLAS_NUM_THREADS"] = "16"  # export OPENBLAS_NUM_THREADS=4
+    os.environ["MKL_NUM_THREADS"] = "16"  # export MKL_NUM_THREADS=6
+    os.environ["VECLIB_MAXIMUM_THREADS"] = "16"  # export VECLIB_MAXIMUM_THREADS=4
+    os.environ["NUMEXPR_NUM_THREADS"] = "16"  # export NUMEXPR_NUM_THREADS=6
+    os.environ["BLIS_NUM_THREADS"] = "16"
+    os.environ["NUMBER_OF_PROCESSORS"] = "8"
 
 
 # Many ML has very high accuracy
 if __name__ == "__main__":
     cpu_limit()
 
-    dataset_path = "../csv/suyashretry.csv"
+    dataset_path = "../csv/suyash10gpieday.csv"
 
     # Format and cleanup dataset
     _data_values, _data_keys = data_extractor(dataset_path)
     _data_values, _data_keys = data_remover(_data_values, _data_keys)
 
     # Creating many ML models
-    model_qty = 4  # 3
-    model_size = 6  # 5
+    model_qty = 3  # 3
+    model_size = 5  # 5
     ml_objects, ml_groups = ml_gen(_data_values, _data_keys, group_size=model_size, ml_qty=model_qty)
 
     # Testing the model
     data_len = len(_data_values)
-    y_pred = [None] * data_len
+    y_pred = [list()] * data_len
     benchmark = []
 
     for i in range(data_len):
