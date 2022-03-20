@@ -77,7 +77,7 @@ def ml_gen(_data_values, _data_keys, group_size=5, ml_qty=3):
     return ml_objects, ml_groups
 
 
-def predict(in_data, ml_qty=3, ml_groups=None):
+def predict(ml_objects, in_data, ml_qty=3, ml_groups=None):
     _pred, _conf = [], []
     for j in range(ml_qty):
         tmp_pred, tmp_conf = ml_objects[j].predict(in_data)
@@ -140,7 +140,7 @@ if __name__ == "__main__":
         start = time.time()
 
         x_true = [_data_values[i]]
-        y_pred[i] = predict(x_true, ml_qty=model_qty)
+        y_pred[i] = predict(ml_objects, x_true, ml_qty=model_qty)
 
         end = time.time()
         benchmark.append(end - start)
