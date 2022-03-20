@@ -5,6 +5,7 @@ from sklearn.ensemble import HistGradientBoostingClassifier
 from ml.ml_class import evaluate_model, get_prediction, save_model, train_model, load_model
 
 
+
 # Save and load location
 _save_dir = "saved_model/"
 
