@@ -12,3 +12,7 @@ gestures_positions = {
     'handPinky':    [ 1,  1,  1, -1, -1],
     'handExit':     [-1, -1, -1,  1, -1]  # exit
 }
+
+# hand Relax hold position
+gestures_list = ['handRelax'] + list(gestures_positions.keys())
+

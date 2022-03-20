@@ -1,3 +1,5 @@
+import random
+
 import matplotlib.pyplot as plt
 from sklearn.metrics import confusion_matrix, accuracy_score, ConfusionMatrixDisplay
 from sklearn.model_selection import train_test_split, cross_val_score
@@ -81,7 +83,7 @@ def train_model(model, data_path="../csv/dataset.csv"):
     x, y = data_extractor(data_path)
 
     # Splitting the dataset into training_set and test_set
-    x_train, x_test, y_train, y_test = train_test_split(x, y, test_size=0.1, random_state=1)
+    x_train, x_test, y_train, y_test = train_test_split(x, y, test_size=0.1, random_state=1000)
 
     # Scaling the data
     scaler = StandardScaler()
