@@ -1,12 +1,12 @@
-import random
 
 import matplotlib.pyplot as plt
 from sklearn.metrics import confusion_matrix, accuracy_score, ConfusionMatrixDisplay
 from sklearn.model_selection import train_test_split, cross_val_score
 from sklearn.preprocessing import StandardScaler
-import pandas as pd
 import pickle as pk
 from pathlib import Path
+
+from ml.data_prep import data_extractor
 from myoband.MyoBandData import read_myoband_data, get_myoband_data
 # from rbpi.servoGestureOutput import motion
 import multiprocessing
@@ -14,15 +14,6 @@ import multiprocessing
 
 # Save and load location
 _save_dir = "saved_model/"
-
-
-# Save reformatted dataset to csv
-def dataset_to_csv(datalist, path):
-    Path(_save_dir + path).mkdir(parents=True, exist_ok=True)
-    pathname = _save_dir + path + "/dataset.csv"
-    df = pd.DataFrame(datalist)
-    df.to_csv(pathname, index=False, header=False, mode='w')
-
 
 def save_model(ml_object, model_dirname="untitled"):
     model, scaler = ml_object
@@ -69,21 +60,13 @@ def evaluate_model(ml_object, input_data, output_data, model_dirname="", fold=No
     return accuracy, score, scores
 
 
-def data_extractor(dataset_path):
-    # Extracting data from csv
-    dataset = pd.read_csv(dataset_path)
-    in_data = dataset.iloc[:, :-1].values
-    out_data = dataset.iloc[:, -1].values
-    return in_data, out_data
-
-
 # Trains classifier with the data in data_filepath (csv/<dataset>.csv)
 def train_model(model, data_path="../csv/dataset.csv"):
     # Extracting data from csv
     x, y = data_extractor(data_path)
 
     # Splitting the dataset into training_set and test_set
-    x_train, x_test, y_train, y_test = train_test_split(x, y, test_size=0.1, random_state=1000)
+    x_train, x_test, y_train, y_test = train_test_split(x, y, test_size=0.1, random_state=1)
 
     # Scaling the data
     scaler = StandardScaler()

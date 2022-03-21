@@ -4,8 +4,6 @@ from sklearn.ensemble import HistGradientBoostingClassifier
 
 from ml.ml_class import evaluate_model, get_prediction, save_model, train_model, load_model
 
-
-
 # Save and load location
 _save_dir = "saved_model/"
 
@@ -25,7 +23,7 @@ class MLObject:
         self.dataset_path = dataset_path
 
         # Dataset (In Memory)
-        self._dataset = None
+        self.dataset = None
 
         # ML Classifier
         if ml_model is None:
@@ -33,6 +31,7 @@ class MLObject:
         self.model = ml_model
         self.scaler = None
         self.ml_object = [self.model, self.scaler]
+        self.ml_gestures = None
 
         # Some Stats
         self.accuracy = None
@@ -58,12 +57,12 @@ class MLObject:
                 print("Mean score: ", self.score)
 
     def train(self):
-        self.ml_object, self._dataset = train_model(self.model, self.dataset_path)
+        self.ml_object, self.dataset = train_model(self.model, self.dataset_path)
         return self
 
     def evaluate(self, fold=None):
         self.fold = fold
-        x_train, x_test, y_train, y_test = self._dataset
+        x_train, x_test, y_train, y_test = self.dataset
         results = evaluate_model(self.ml_object, x_test, y_test, self.model_dirname, fold)
         self.accuracy, self.score, self.scores = results
         return self
