@@ -5,10 +5,11 @@ from myoband.MyoBandData import read_myoband_data, get_myoband_data
 from ml.ml_class import train_model, get_prediction
 from rbpi.servoGestureOutput import motion
 from rbpi.gestures import gestures_positions
+from rbpi.haptic_feedback import HapticFeedback
+from time import sleep, time
 import numpy as np
 import pandas as pd
 import multiprocessing
-from time import sleep, time
 import RPi.GPIO as GPIO
 import os.path
 
@@ -22,6 +23,7 @@ q2 = multiprocessing.Queue()
 
 gestures = list(gestures_positions.keys())
 gesture_counters = [0] * len(gestures)
+hf = HapticFeedback('/dev/ttyUSB0', 9600)
 
 
 def test():
@@ -38,13 +40,17 @@ def test():
     from sklearn.neighbors import KNeighborsClassifier
     ml_model = KNeighborsClassifier(n_neighbors=5, metric='minkowski', p=2)
 
+    # Haptic feedback initialization
+    hf.start() # Disabled by default
+
+
     print("Starting myoband connection...")
     p = multiprocessing.Process(target=read_myoband_data, args=(q1, q2,))
     try:
         p.start()
         sleep(5)
         try:
-            print('>>> PATH: ' + filepathname)
+            # print('>>> PATH: ' + filepathname)
             if os.path.isfile(filepathname):
                 num_lines = sum(1 for line in open(filepathname))
                 if num_lines < 100:
@@ -63,8 +69,10 @@ def test():
         classifier, scaler = train_model(ml_model, filename)
 
         print("train_model done")
-        while True:
 
+        hf.enable()
+
+        while True:
             if buttonStatus() in (1, 2):
                 try:
                     if buttonStatus() == 2:  # Then erase all the content of the file
@@ -102,12 +110,15 @@ def test():
     except KeyboardInterrupt:
         motion("handExit")
         p.terminate()
+        hf.terminate()
         p.join()
+        hf.join()
 
 
 # Creates the dataset in the csv folder. Returns the path of the file relative to
 # the top directory of the project (returns path like "csv/<filename>.csv)
 def calibrate(filepath):
+    hf.disable()
     print("Starting data collection for calibration...")
     secs = 1
 
@@ -138,6 +149,7 @@ def calibrate(filepath):
 
     # TODO: LED blink twice
     print("Data collection complete. Dataset file created")
+    hf.enable()
 
 
 if __name__ == '__main__':
