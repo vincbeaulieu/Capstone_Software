@@ -2,7 +2,7 @@
 from myoband.MyoBandData import read_myoband_data, get_myoband_data
 from ml.ml_class import train_model, get_prediction
 from rbpi.servoGestureOutput import motion
-from rbpi.gestures import gestures_positions
+from rbpi.gestures import gestures_positions, gestures_list
 import numpy as np
 import pandas as pd
 import multiprocessing
@@ -19,9 +19,11 @@ import buttonTest as btn
 q1 = multiprocessing.Queue()
 q2 = multiprocessing.Queue()
 
-gestures = list(gestures_positions.keys())
-gesture_counters = [0] * len(gestures)
+# gestures = list(gestures_positions.keys())
 
+handRemoved = ['handPeace', 'handRock', 'handOk', 'handFlip', 'handExit']
+gestures = [g for g in gestures_list if g not in handRemoved]
+gesture_counters = [0] * len(gestures)
 
 def print_error(exception):
     _RED_ = '\033[91m'

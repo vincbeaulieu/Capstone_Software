@@ -19,7 +19,7 @@ from rbpi.gestures import gestures_list
 _save_dir = "saved_model/"
 
 handRemoved = ['handPeace', 'handRock', 'handOk', 'handFlip', 'handExit']
-
+gestures = [g for g in gestures if g not in handRemoved]
 
 v = True  # verbose
 def group_gen(group_size=5, group_qty=3):
@@ -118,9 +118,9 @@ def cpu_limit():
 
 # Many ML has very high accuracy
 if __name__ == "__main__":
-    cpu_limit()
+    #cpu_limit()
 
-    dataset_path = "../csv/suyash10gpieday.csv"
+    dataset_path = "../csv/suyashretry.csv"
 
     # Format and cleanup dataset
     _data_values, _data_keys = data_extractor(dataset_path)
