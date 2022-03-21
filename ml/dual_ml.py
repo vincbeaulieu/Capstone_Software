@@ -13,6 +13,7 @@ from sklearn.metrics import ConfusionMatrixDisplay, accuracy_score
 from ml.ml_class import train_model, save_model, get_prediction
 from rbpi.gestures import gestures_positions
 
+handRemoved = ['handPeace', 'handRock']
 
 def ml_object(model_name, dataset_name=None, dataset_path=None):
     # Import and create a ML model
@@ -51,11 +52,11 @@ def data_divider(source_name="dataset.csv", destination_path="saved_model/datase
     # print(gestures, random_gestures)
 
     # Reformat the dataset into 2 complementary sets
-    part = len(gestures)/2
+    part = int(len(gestures)/2)
     for index, key in enumerate(keys):
         # ','.join(map(str, values[index])) + ',' + 'handUnknown'
         assigned = np.concatenate((values[index], key), axis=None)
-        if key == 'handPeace' or key == 'handRock':
+        if key in handRemoved:
             pass  # Do nothing
         elif key in gestures[0:part]:
             ml_1.append(assigned)
@@ -87,7 +88,7 @@ if __name__ == "__main__":
     keys_temp = []
     values_temp = []
     for i, data_key in enumerate(data_keys):
-        if data_key == 'handPeace' or data_key == 'handRock':
+        if data_key in handRemoved:
             pass
         else:
             keys_temp.append(data_keys[i])
