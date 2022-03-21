@@ -1,6 +1,6 @@
 
 from myoband.MyoBandData import read_myoband_data, get_myoband_data
-from ml.ml_class import train_model, get_prediction
+#from ml.ml_class import train_model, get_prediction
 from rbpi.servoGestureOutput import motion
 from rbpi.gestures import gestures_positions, gestures_list
 import numpy as np
@@ -8,13 +8,16 @@ import pandas as pd
 import multiprocessing
 from time import sleep, time
 import os.path
+from buttonTest import buttonStatus
+from ml.dual_ml import data_extractor, data_remover, predict, ml_gen
+
 
 # NOTE: This is already declared in buttonTest.py
-# import RPi.GPIO as GPIO
-# GPIO.setmode(GPIO.BCM)  # Use physical pin numbering
-# GPIO.setup(10, GPIO.IN, pull_up_down=GPIO.PUD_DOWN)  # Set pin 10 to be an input pin
+import RPi.GPIO as GPIO
+GPIO.setmode(GPIO.BCM)  # Use physical pin numbering
+GPIO.setup(15, GPIO.IN, pull_up_down=GPIO.PUD_DOWN)  # Set pin 10 to be an input pin
 
-import buttonTest as btn
+dataset_path = "../csv/suyashretry.csv"
 
 q1 = multiprocessing.Queue()
 q2 = multiprocessing.Queue()
@@ -34,15 +37,17 @@ def print_error(exception):
 def launch():
     # Variable declarations:
     global gesture_counters
+    buttonStatus(0)
     q3 = []
 
     # Defining filepath of the dataset (Will be simplified later tonight)
-    filepath = "csv/"
-    filename = "dataset.csv"
-    file_pathname = filepath + filename
+    # filepath = "csv/"
+    # filename = "dataset.csv"
+    # file_pathname = filepath + filename
+    dataset_path = "../csv/suyashretry.csv"
     # Import and create a ML model
-    from sklearn.neighbors import KNeighborsClassifier
-    ml_model = KNeighborsClassifier(n_neighbors=5, metric='minkowski', p=2)
+    #from sklearn.neighbors import KNeighborsClassifier
+    #ml_model = KNeighborsClassifier(n_neighbors=5, metric='minkowski', p=2)
 
     print("Starting myoband connection...")
     p = multiprocessing.Process(target=read_myoband_data, args=(q1, q2,))
@@ -65,25 +70,35 @@ def launch():
         except Exception as e:
             print_error(e)
 
-        classifier, scaler = train_model(ml_model, file_pathname)
+        _data_values, _data_keys = data_extractor(dataset_path)
+        _data_values, _data_keys = data_remover(_data_values, _data_keys)
+        model_qty = 3  # 3
+        model_size = 5  # 5
+        ml_objects, ml_groups = ml_gen(_data_values, _data_keys, group_size=model_size, ml_qty=model_qty)
+        #classifier, scaler = train_model(ml_model, file_pathname)
 
         while True:
-            if btn.button_status() in (1, 2):
+            if buttonStatus() in (1, 2):
                 try:
-                    if btn.button_status() == 2:  # Then erase all the content of the file
+                    if buttonStatus() == 2:  # Then erase all the content of the file
                         with open(file_pathname, 'w') as file:
                             file.writelines("")
 
                     calibrate(file_pathname)
-                    classifier, scaler = train_model(ml_model, file_pathname)
+                    _data_values, _data_keys = data_extractor(dataset_path)
+                    _data_values, _data_keys = data_remover(_data_values, _data_keys)
+                    ml_objects, ml_groups = ml_gen(_data_values, _data_keys, group_size=model_size, ml_qty=model_qty)
+                    #classifier, scaler = train_model(ml_model, file_pathname)
 
-                    btn.button_status(0)
+                    buttonStatus(0)
                 except Exception as e:
                     print_error(e)
 
             emg1, emg2 = get_myoband_data(q1, q2)
             emg_data = [emg1 + emg2]
-            predicted = get_prediction(emg_data, classifier, scaler)
+            #predicted = get_prediction(emg_data, classifier, scaler)
+            predict(ml_objects, ml_groups, x_true, ml_qty=model_qty)
+            print("prediction", predict)
 
             if len(q3) >= 15:
                 counter_index = gesture_counters.index(max(gesture_counters))
@@ -104,6 +119,7 @@ def launch():
         motion("handExit")
         p.terminate()
         p.join()
+        GPIO.cleanup()
 
 
 # Creates the dataset in the csv folder. Returns the path of the file relative to
@@ -116,6 +132,9 @@ def calibrate(filepath):
         print('Please perform the following gesture: ' + str(gesture))
         motion(gesture)
 
+        while buttonStatus() != 1:
+            pass
+        buttonStatus(0)
         # TODO: light led up
 
         start_time = time()
