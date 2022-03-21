@@ -77,7 +77,7 @@ def ml_gen(_data_values, _data_keys, group_size=5, ml_qty=3):
     return ml_objects, ml_groups
 
 
-def predict(ml_objects, ml_groups, in_data, ml_qty=3):
+def predict(ml_objects, in_data, group_size=5, ml_qty=3):
     _pred, _conf = [], []
     for j in range(ml_qty):
         tmp_pred, tmp_conf = ml_objects[j].predict(in_data)
@@ -116,12 +116,7 @@ def cpu_limit():
     os.environ["NUMBER_OF_PROCESSORS"] = "8"
 
 
-# Many ML has very high accuracy
-if __name__ == "__main__":
-    #cpu_limit()
-
-    dataset_path = "../csv/suyashretry.csv"
-
+def initialize(dataset_path, model_size=5, model_qty=3):
     # Format and cleanup dataset
     _data_values, _data_keys = data_extractor(dataset_path)
     _data_values, _data_keys = data_remover(_data_values, _data_keys)
@@ -130,6 +125,25 @@ if __name__ == "__main__":
     model_qty = 3  # 3
     model_size = 5  # 5
     ml_objects, ml_groups = ml_gen(_data_values, _data_keys, group_size=model_size, ml_qty=model_qty)
+
+    return ml_objects
+
+
+def launch():
+    # cpu_limit()
+
+    dataset_path = "../csv/suyashretry.csv"
+
+    # INITIALIZE START #
+    # Format and cleanup dataset
+    _data_values, _data_keys = data_extractor(dataset_path)
+    _data_values, _data_keys = data_remover(_data_values, _data_keys)
+
+    # Creating many ML models
+    model_qty = 3  # 3
+    model_size = 5  # 5
+    ml_objects, ml_groups = ml_gen(_data_values, _data_keys, group_size=model_size, ml_qty=model_qty)
+    # INITIALIZE END #
 
     # Testing the model
     data_len = len(_data_values)
@@ -140,7 +154,7 @@ if __name__ == "__main__":
         start = time.time()
 
         x_true = [_data_values[i]]
-        y_pred[i] = predict(ml_objects, ml_groups, x_true, ml_qty=model_qty)
+        y_pred[i] = predict(ml_objects, x_true, ml_qty=model_qty)
 
         end = time.time()
         benchmark.append(end - start)
@@ -162,3 +176,10 @@ if __name__ == "__main__":
     # Printing the model accuracy
     model_accuracy = accuracy_score(_data_keys[:-1], y_pred)
     print("Total accuracy: ", model_accuracy)
+
+
+# Many ML has very high accuracy
+if __name__ == "__main__":
+    launch()
+
+
