@@ -72,6 +72,7 @@ def train_model(model, data_name="dataset.csv", data_path="../csv/", fold=None):
 
     # Splitting the dataset into training_set and test_set
     x_train, x_test, y_train, y_test = train_test_split(x, y, test_size=0.1, random_state=1)
+    dataset = [x_train, x_test, y_train, y_test]
 
     # Scaling the data
     scaler = StandardScaler()
@@ -86,7 +87,7 @@ def train_model(model, data_name="dataset.csv", data_path="../csv/", fold=None):
 
     # Returning the model
     print("Model training completed.")
-    return model, scaler
+    return model, scaler, dataset
 
 
 def get_prediction(input_data, model, scaler):
@@ -132,7 +133,7 @@ if __name__ == "__main__":
 
     # Train the ML model
     dataset_name = "suyash10gpieday.csv"
-    ml_model, ml_scaler = train_model(ml_model, dataset_name, fold=10)
+    ml_model, ml_scaler, ml_dataset = train_model(ml_model, dataset_name, fold=10)
 
     # Save the ML model
     save_model(ml_model, ml_scaler, name=model_name)

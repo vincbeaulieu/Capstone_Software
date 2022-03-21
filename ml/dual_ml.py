@@ -15,19 +15,20 @@ from rbpi.gestures import gestures_positions
 
 handRemoved = ['handPeace', 'handRock']
 
+
 def ml_object(model_name, dataset_name=None, dataset_path=None):
     # Import and create a ML model
     from sklearn.ensemble import BaggingClassifier, HistGradientBoostingClassifier
-    #ml_model = BaggingClassifier(HistGradientBoostingClassifier())  # 80% - Stupid slow
+    # ml_model = BaggingClassifier(HistGradientBoostingClassifier())  # 80% - Stupid slow
     ml_model = HistGradientBoostingClassifier()  # 77% - Not very fast (need to be tested on the rbpi)
 
     # Train the ML model
-    ml_model, ml_scaler = train_model(ml_model, dataset_name, dataset_path)
+    ml_model, ml_scaler, ml_dataset = train_model(ml_model, dataset_name, dataset_path)
 
     # Save the ML model
     save_model(ml_model, ml_scaler, model_name)
 
-    return ml_model, ml_scaler
+    return ml_model, ml_scaler, ml_dataset
 
 
 def data_extractor(name, path="../csv/"):
@@ -36,6 +37,7 @@ def data_extractor(name, path="../csv/"):
     values = dataset.iloc[:, :-1].values
     keys = dataset.iloc[:, -1].values
     return keys, values
+
 
 def data_divider(source_name="dataset.csv", destination_path="saved_model/datasets/"):
     # Creating the directory if it doesn't exist
@@ -52,7 +54,7 @@ def data_divider(source_name="dataset.csv", destination_path="saved_model/datase
     # print(gestures, random_gestures)
 
     # Reformat the dataset into 2 complementary sets
-    part = int(len(gestures)/2)
+    part = int(len(gestures) / 2)
     for index, key in enumerate(keys):
         # ','.join(map(str, values[index])) + ',' + 'handUnknown'
         assigned = np.concatenate((values[index], key), axis=None)
@@ -81,10 +83,14 @@ if __name__ == "__main__":
     data_divider(data_name, data_path)
 
     # Creating many ML models
-    model_1, scaler_1 = ml_object("dual_ml/ml_1", dataset_name="ml_1", dataset_path=data_path)
-    model_2, scaler_2 = ml_object("dual_ml/ml_2", dataset_name="ml_2", dataset_path=data_path)
+    model_1, scaler_1, dataset_1 = ml_object("dual_ml/ml_1", dataset_name="ml_1", dataset_path=data_path)
+    model_2, scaler_2, dataset_2 = ml_object("dual_ml/ml_2", dataset_name="ml_2", dataset_path=data_path)
 
-    data_keys, data_values = data_extractor(data_name)
+    # Getting testing data
+    data_values = np.concatenate((dataset_1[1], dataset_2[1]), axis=0)
+    data_keys = np.concatenate((dataset_1[3], dataset_2[3]), axis=0)
+
+    # data_keys, data_values = data_extractor(data_name)
     keys_temp = []
     values_temp = []
     for i, data_key in enumerate(data_keys):
@@ -95,7 +101,6 @@ if __name__ == "__main__":
             values_temp.append(data_values[i])
     data_keys = keys_temp
     data_values = values_temp
-
 
     # Testing the model
     data_len = len(data_values)
@@ -117,12 +122,7 @@ if __name__ == "__main__":
 
         end = time.time()
         benchmark.append(end - start)
-
-        if i % 1000 == 0:
-            print()
-            print(sum(benchmark) / len(benchmark))
-
-        sys.stdout.write("\r{0} / {1}".format(i, data_len - 1))
+        sys.stdout.write("\r{0} / {1} \t accuracy: {2} ".format(i, data_len - 1, sum(benchmark)/len(benchmark)))
         sys.stdout.flush()
 
     sys.stdout.write("\n")
