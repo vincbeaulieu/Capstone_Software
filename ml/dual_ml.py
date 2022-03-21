@@ -11,9 +11,7 @@ from pathlib import Path
 from sklearn.metrics import ConfusionMatrixDisplay, accuracy_score
 
 from ml.ml_class import train_model, save_model, get_prediction
-from rbpi.gestures import gestures_positions
-
-handRemoved = ['handPeace', 'handRock']
+from rbpi.gestures import handRemoved, gestures
 
 
 def ml_object(model_name, dataset_name=None, dataset_path=None):
@@ -43,15 +41,13 @@ def data_divider(source_name="dataset.csv", destination_path="saved_model/datase
     # Creating the directory if it doesn't exist
     Path(destination_path).mkdir(parents=True, exist_ok=True)
 
-    gestures = list(gestures_positions.keys())
+    # gestures = list(gestures_positions.keys())
 
     # Extracting data from csv
     keys, values = data_extractor(source_name)
 
     ml_1 = []
     ml_2 = []
-
-    # print(gestures, random_gestures)
 
     # Reformat the dataset into 2 complementary sets
     part = int(len(gestures) / 2)
