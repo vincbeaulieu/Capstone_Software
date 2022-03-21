@@ -37,12 +37,12 @@ def my_callback(channel):
 
         if elapsed >= 5:
             buttonStatus(2)
-            print("Button was pushed for a while!")
+            print("button status 2")
         elif elapsed >= 2:
             buttonStatus(1)
-            print("Button was pushed")
+            print("Button status 1")
         else:
-            print("lol")
+            print("button status 0")
             buttonStatus(0)
 
 

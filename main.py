@@ -13,9 +13,9 @@ import RPi.GPIO as GPIO
 import os.path
 
 GPIO.setmode(GPIO.BCM)  # Use physical pin numbering
-GPIO.setup(10, GPIO.IN, pull_up_down=GPIO.PUD_DOWN)  # Set pin 10 to be an input pin
+GPIO.setup(15, GPIO.IN, pull_up_down=GPIO.PUD_DOWN)  # Set pin 10 to be an input pin
 
-import buttonTest
+from buttonTest import buttonStatus
 
 q1 = multiprocessing.Queue()
 q2 = multiprocessing.Queue()
@@ -27,6 +27,7 @@ gesture_counters = [0] * len(gestures)
 def test():
     # Variable declarations:
     global gesture_counters
+    buttonStatus(0)
     q3 = []
 
     # Defining filepath of the dataset (Will be simplified later tonight)
@@ -64,17 +65,16 @@ def test():
         print("train_model done")
         while True:
 
-            if buttonTest.button_state in range (1, 2):
+            if buttonStatus() in (1, 2):
                 try:
-                    if buttonTest.button_state == 2:  # Then erase all the content of the file
+                    if buttonStatus() == 2:  # Then erase all the content of the file
                         with open(filepathname, 'w') as file:
-                            file.writelines("")
-
+                            file.writelines("")                    
+                    buttonStatus(0)
                     # TODO: To simplified (Vincent)
                     calibrate(filepathname)
                     classifier, scaler = train_model(ml_model, filename)
-                    
-                    buttonStatus = 0
+
                 except Exception as e:
                     print(e)
 
@@ -108,8 +108,6 @@ def test():
 # Creates the dataset in the csv folder. Returns the path of the file relative to
 # the top directory of the project (returns path like "csv/<filename>.csv)
 def calibrate(filepath):
-    global buttonStatus
-
     print("Starting data collection for calibration...")
     secs = 1
 
@@ -117,7 +115,9 @@ def calibrate(filepath):
         print('Please perform the following gesture: ' + str(gesture))
         motion(gesture)
 
-        sleep(1)
+        while buttonStatus() != 1:
+            pass
+        buttonStatus(0)
 
         print('start gesture')# TODO: replace with light led up
 
@@ -142,6 +142,3 @@ def calibrate(filepath):
 
 if __name__ == '__main__':
    test()
-#    while True:
-#        sleep(0.5)
-#        print(buttonStatus())
