@@ -11,7 +11,7 @@ from pathlib import Path
 from sklearn.metrics import ConfusionMatrixDisplay, accuracy_score
 
 from ml.ml_class import data_extractor, dataset_to_csv
-from MLObject import MLObject
+from ml.MLObject import MLObject
 
 from rbpi.gestures import gestures_list
 

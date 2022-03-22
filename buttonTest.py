@@ -5,7 +5,7 @@ GPIO.setmode(GPIO.BCM)
 GPIO.setup(15, GPIO.IN, pull_up_down=GPIO.PUD_DOWN)
 
 global button_state
-global button_toggle
+global button_toggle 
 
 buttontoggle = False
 button_state = 0
@@ -16,7 +16,7 @@ def buttonStatus(setStatus=None):
         button_state = setStatus
     return button_state
 
-
+start = 0
 def my_callback(channel):
     global start
     global buttontoggle

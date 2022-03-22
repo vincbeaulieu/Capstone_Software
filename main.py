@@ -1,4 +1,3 @@
-
 from myoband.MyoBandData import read_myoband_data, get_myoband_data
 from rbpi.servoGestureOutput import motion
 from rbpi.gestures import gestures_list
@@ -94,23 +93,23 @@ def launch():
             emg_data = [emg1 + emg2]
             # predicted = get_prediction(emg_data, classifier, scaler)
             predicted = predict(ml_objects, emg_data, model_size, model_qty)
-            print("prediction", predict)
-
-            prediction_buffer = 15
-            if len(q3) >= prediction_buffer:
-                counter_index = gesture_counters.index(max(gesture_counters))
+            print("prediction", predicted)
+            motion(predicted[0])
+            prediction_buffer = 1
+#            if len(q3) >= prediction_buffer:
+#                counter_index = gesture_counters.index(max(gesture_counters))
 
                 # Perform the motion on the prosthetic
-                motion(gestures[counter_index])
-                print(gestures[counter_index])
+#                motion(gestures[counter_index])
+#                print(gestures[counter_index])
 
-                q3.clear()
-                gesture_counters = [0] * len(gestures)
-            else:
-                prediction = predicted[0]
-                q3.append(prediction)
-                counter_index = gestures.index(prediction)
-                gesture_counters[counter_index] += 1
+#                q3.clear()
+#                gesture_counters = [0] * len(gestures)
+#            else:
+#                prediction = predicted[0]
+#                q3.append(prediction)
+#                counter_index = gestures.index(prediction)
+#                gesture_counters[counter_index] += 1
 
     except KeyboardInterrupt:
         motion("handExit")
