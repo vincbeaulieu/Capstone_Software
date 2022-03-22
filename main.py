@@ -74,17 +74,14 @@ def launch():
         ml_objects = initialize(file_pathname, model_size, model_qty)
 
         while True:
-            if buttonStatus() in (1, 2):
+            if buttonStatus() in (1,2):
                 try:
-                    if buttonStatus() == 2:  # Then erase all the content of the file
-                        with open(file_pathname, 'w') as file:
-                            file.writelines("")
-
+                # Erase all the content of the file
+                    with open(file_pathname, 'w') as file:
+                        file.writelines("")
                     calibrate(file_pathname)
-
                     # classifier, scaler = train_model(ml_model, file_pathname)
                     ml_objects = initialize(file_pathname, model_size, model_qty)
-
                     buttonStatus(0)
                 except Exception as e:
                     print_error(e)
@@ -92,8 +89,11 @@ def launch():
             emg1, emg2 = get_myoband_data(q1, q2)
             emg_data = [emg1 + emg2]
             # predicted = get_prediction(emg_data, classifier, scaler)
+            t0 = time()
             predicted = predict(ml_objects, emg_data, model_size, model_qty)
-            print("prediction", predicted)
+            t1 = time()
+            print("prediction: ",predicted)
+            print("Prediction time ", (t1-t0))
             motion(predicted[0])
             prediction_buffer = 1
 #            if len(q3) >= prediction_buffer:
@@ -121,9 +121,10 @@ def launch():
 # Creates the dataset in the csv folder. Returns the path of the file relative to
 # the top directory of the project (returns path like "csv/<filename>.csv)
 def calibrate(filepath):
+    buttonStatus(0)
     print("Starting data collection for calibration...")
-    secs = 1
-    for x in range (3):
+    secs = 0.5
+    for x in range (6):
         for gesture in gestures:
             print('Please perform the following gesture: ' + str(gesture))
             motion(gesture)

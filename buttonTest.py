@@ -35,10 +35,10 @@ def my_callback(channel):
         elapsed = time() - start
         print(elapsed)
 
-        if elapsed >= 5:
+        if elapsed >= 6:
             buttonStatus(2)
             print("button status 2")
-        elif elapsed >= 2:
+        if elapsed >= 0.1:
             buttonStatus(1)
             print("Button status 1")
         else:
@@ -48,3 +48,8 @@ def my_callback(channel):
 
 
 GPIO.add_event_detect(15, GPIO.BOTH, callback=my_callback, bouncetime=200)
+
+if __name__ == '__main__':
+    while True:
+        print(buttonStatus())
+        sleep(1)
