@@ -123,30 +123,30 @@ def launch():
 def calibrate(filepath):
     print("Starting data collection for calibration...")
     secs = 1
+    for x in range (3):
+        for gesture in gestures:
+            print('Please perform the following gesture: ' + str(gesture))
+            motion(gesture)
 
-    for gesture in gestures:
-        print('Please perform the following gesture: ' + str(gesture))
-        motion(gesture)
+            while buttonStatus() != 1:
+                pass
+            buttonStatus(0)
+            # TODO: light led up
 
-        while buttonStatus() != 1:
-            pass
-        buttonStatus(0)
-        # TODO: light led up
+            start_time = time()
+            myo_data = []
+            while time() - start_time < secs:
+                m1, m2 = get_myoband_data(q1, q2)
+                emg = np.concatenate((m1, m2, gesture), axis=None)
+                myo_data.append(emg)
 
-        start_time = time()
-        myo_data = []
-        while time() - start_time < secs:
-            m1, m2 = get_myoband_data(q1, q2)
-            emg = np.concatenate((m1, m2, gesture), axis=None)
-            myo_data.append(emg)
+            motion('handOpen')
 
-        motion('handOpen')
+            print("Gesture collection done... writing to file")
+            df = pd.DataFrame(myo_data)
+            df.to_csv(filepath, index=False, header=False, mode='a')
 
-        print("Gesture collection done... writing to file")
-        df = pd.DataFrame(myo_data)
-        df.to_csv(filepath, index=False, header=False, mode='a')
-
-        # TODO: close led
+            # TODO: close led
 
     # TODO: LED blink twice
     print("Data collection complete. Dataset file created")
