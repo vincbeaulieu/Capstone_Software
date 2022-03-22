@@ -11,7 +11,6 @@ from myoband.MyoBandData import read_myoband_data, get_myoband_data
 # from rbpi.servoGestureOutput import motion
 import multiprocessing
 
-
 # Save and load location
 _save_dir = "saved_model/"
 

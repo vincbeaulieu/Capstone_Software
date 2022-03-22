@@ -45,8 +45,6 @@ def my_callback(channel):
             print("button status 0")
             buttonStatus(0)
 
-
-
 GPIO.add_event_detect(15, GPIO.BOTH, callback=my_callback, bouncetime=200)
 
 if __name__ == '__main__':

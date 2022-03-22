@@ -5,12 +5,13 @@ import numpy as np
 import pandas as pd
 import multiprocessing
 from time import sleep, time
+from rbpi.haptic_feedback import HapticFeedback
+import RPi.GPIO as GPIO
 import os.path
 from buttonTest import buttonStatus
 from ml.dual_ml import initialize, predict
 
 # NOTE: This is already declared in buttonTest.py
-import RPi.GPIO as GPIO
 GPIO.setmode(GPIO.BCM)  # Use physical pin numbering
 GPIO.setup(15, GPIO.IN, pull_up_down=GPIO.PUD_DOWN)  # Set pin 10 to be an input pin
 
@@ -22,6 +23,7 @@ q2 = multiprocessing.Queue()
 handRemoved = ['handPeace', 'handRock', 'handOk', 'handFlip', 'handExit']
 gestures = [g for g in gestures_list if g not in handRemoved]
 gesture_counters = [0] * len(gestures)
+hf = HapticFeedback('/dev/ttyUSB0', 9600)
 
 def print_error(exception):
     _RED_ = '\033[91m'
@@ -49,6 +51,10 @@ def launch():
     # from sklearn.neighbors import KNeighborsClassifier
     # ml_model = KNeighborsClassifier(n_neighbors=5, metric='minkowski', p=2)
 
+    # Haptic feedback initialization
+    hf.start() # Disabled by default
+
+
     print("Starting myoband connection...")
     p = multiprocessing.Process(target=read_myoband_data, args=(q1, q2,))
     try:
@@ -59,6 +65,7 @@ def launch():
                 num_lines = sum(1 for line in open(file_pathname))
                 if num_lines < 100:
                     calibrate(file_pathname)
+            # print('>>> PATH: ' + filepathname)
                 else:
                     # File is already populated. Therefore, load a model
                     # TODO: Load a ML model, ml_class is not completely ready. Testing is require.
@@ -114,6 +121,8 @@ def launch():
     except KeyboardInterrupt:
         motion("handExit")
         p.terminate()
+        hf.terminate()
+        hf.join()
         p.join()
         GPIO.cleanup()
 
@@ -122,6 +131,7 @@ def launch():
 # the top directory of the project (returns path like "csv/<filename>.csv)
 def calibrate(filepath):
     buttonStatus(0)
+    hf.disable()
     print("Starting data collection for calibration...")
     secs = 0.5
     for x in range (6):
@@ -146,16 +156,18 @@ def calibrate(filepath):
             print("Gesture collection done... writing to file")
             df = pd.DataFrame(myo_data)
             df.to_csv(filepath, index=False, header=False, mode='a')
-
             # TODO: close led
 
     # TODO: LED blink twice
     print("Data collection complete. Dataset file created")
+    hf.enable()
 
 
 if __name__ == '__main__':
     launch()
-
     pass
 
 
+=======
+   test()
+>>>>>>> main
