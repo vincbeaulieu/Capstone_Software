@@ -107,13 +107,13 @@ def data_remover(_data_values, _data_keys):
 
 def cpu_limit():
     # For some reason, limiting Python to a single thread improve speed by a lot
-    os.environ["OMP_NUM_THREADS"] = "16"  # export OMP_NUM_THREADS=4
-    os.environ["OPENBLAS_NUM_THREADS"] = "16"  # export OPENBLAS_NUM_THREADS=4
-    os.environ["MKL_NUM_THREADS"] = "16"  # export MKL_NUM_THREADS=6
-    os.environ["VECLIB_MAXIMUM_THREADS"] = "16"  # export VECLIB_MAXIMUM_THREADS=4
-    os.environ["NUMEXPR_NUM_THREADS"] = "16"  # export NUMEXPR_NUM_THREADS=6
-    os.environ["BLIS_NUM_THREADS"] = "16"
-    os.environ["NUMBER_OF_PROCESSORS"] = "8"
+    os.environ["OMP_NUM_THREADS"] = "1"  # export OMP_NUM_THREADS=4
+    os.environ["OPENBLAS_NUM_THREADS"] = "1"  # export OPENBLAS_NUM_THREADS=4
+    os.environ["MKL_NUM_THREADS"] = "1"  # export MKL_NUM_THREADS=6
+    os.environ["VECLIB_MAXIMUM_THREADS"] = "1"  # export VECLIB_MAXIMUM_THREADS=4
+    os.environ["NUMEXPR_NUM_THREADS"] = "1"  # export NUMEXPR_NUM_THREADS=6
+    os.environ["BLIS_NUM_THREADS"] = "1"
+    os.environ["NUMBER_OF_PROCESSORS"] = "1"
 
 
 def initialize(dataset_path, model_size=5, model_qty=3):
@@ -130,7 +130,7 @@ def initialize(dataset_path, model_size=5, model_qty=3):
 
 
 def launch():
-    # cpu_limit()
+    cpu_limit()
 
     dataset_path = "../csv/suyashretry.csv"
 
