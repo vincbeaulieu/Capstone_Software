@@ -5,7 +5,7 @@ GPIO.setmode(GPIO.BCM)
 GPIO.setup(15, GPIO.IN, pull_up_down=GPIO.PUD_DOWN)
 
 global button_state
-global button_toggle
+global button_toggle 
 
 buttontoggle = False
 button_state = 0
@@ -16,7 +16,7 @@ def buttonStatus(setStatus=None):
         button_state = setStatus
     return button_state
 
-
+start = 0
 def my_callback(channel):
     global start
     global buttontoggle
@@ -35,16 +35,19 @@ def my_callback(channel):
         elapsed = time() - start
         print(elapsed)
 
-        if elapsed >= 5:
+        if elapsed >= 6:
             buttonStatus(2)
             print("button status 2")
-        elif elapsed >= 2:
+        if elapsed >= 0.1:
             buttonStatus(1)
             print("Button status 1")
         else:
             print("button status 0")
             buttonStatus(0)
 
-
-
 GPIO.add_event_detect(15, GPIO.BOTH, callback=my_callback, bouncetime=200)
+
+if __name__ == '__main__':
+    while True:
+        print(buttonStatus())
+        sleep(1)

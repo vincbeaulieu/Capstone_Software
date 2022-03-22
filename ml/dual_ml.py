@@ -1,7 +1,7 @@
+import os
+import random
 import sys
 import time
-from copy import deepcopy
-from random import shuffle
 
 import matplotlib.pyplot as plt
 import numpy as np
@@ -10,122 +10,176 @@ from pathlib import Path
 
 from sklearn.metrics import ConfusionMatrixDisplay, accuracy_score
 
-from ml.ml_class import train_model, save_model, get_prediction
-from rbpi.gestures import gestures_positions
+from ml.ml_class import data_extractor, dataset_to_csv
+from ml.MLObject import MLObject
 
+from rbpi.gestures import gestures_list
 
-def ml_object(model_name, dataset_name=None, dataset_path=None):
-    # Import and create a ML model
-    from sklearn.ensemble import BaggingClassifier, HistGradientBoostingClassifier
-    # ml_model = BaggingClassifier(HistGradientBoostingClassifier())  # 80% - Stupid slow
-    ml_model = HistGradientBoostingClassifier()  # 77% - Not very fast (need to be tested on the rbpi)
+# Save and load location
+_save_dir = "saved_model/"
 
-    # Train the ML model
-    ml_model, ml_scaler = train_model(ml_model, dataset_name, dataset_path)
+handRemoved = ['handPeace', 'handRock', 'handOk', 'handFlip', 'handExit']
+gestures = [g for g in gestures_list if g not in handRemoved]
 
-    # Save the ML model
-    save_model(ml_model, ml_scaler, model_name)
+v = True  # verbose
+def group_gen(group_size=5, group_qty=3):
+    gestures = gestures_list
+    random.shuffle(gestures)
+    print(gestures)
 
-    return ml_model, ml_scaler
+    # Remove unwanted gesture
+    gestures = [g for g in gestures if g not in handRemoved]
+    gestures_len = len(gestures)
 
+    gestures_groups = []
+    tmp_list = []
+    group_nb, i = 0, 0
+    while group_nb <= group_qty:
+        _GREEN_, _END_ = '\033[92m', '\033[0m'
+        v and (not(i % group_size) and print(_GREEN_, end=''))
 
-def data_extractor(name, path="../csv/"):
-    # Extracting data from csv
-    dataset = pd.read_csv(path + name)
-    values = dataset.iloc[:, :-1].values
-    keys = dataset.iloc[:, -1].values
-    return keys, values
+        gesture_index = i % gestures_len
+        gesture = gestures[gesture_index]
 
-
-def data_divider(source_name="dataset.csv", destination_path="saved_model/datasets/"):
-    # Creating the directory if it doesn't exist
-    Path(destination_path).mkdir(parents=True, exist_ok=True)
-
-    gestures = list(gestures_positions.keys())
-
-    # Extracting data from csv
-    keys, values = data_extractor(source_name)
-
-    ml_1 = []
-    ml_2 = []
-
-    # print(gestures, random_gestures)
-
-    # Reformat the dataset into 2 complementary sets
-    part = int(len(gestures) / 2)
-    for index, key in enumerate(keys):
-        # ','.join(map(str, values[index])) + ',' + 'handUnknown'
-        assigned = np.concatenate((values[index], key), axis=None)
-        if key == 'handPeace' or key == 'handRock':
-            pass  # Do nothing
-        elif key in gestures[0:part]:
-            ml_1.append(assigned)
+        if i % group_size == 0:
+            (i != 0) and gestures_groups.append(tmp_list)
+            tmp_list = [gesture]
+            group_nb += 1
         else:
-            ml_2.append(assigned)
+            tmp_list.append(gesture)
 
-    # Save reformatted dataset to csv
-    def dataset_to_csv(datalist, path, name):
-        pathname = path + name
-        df = pd.DataFrame(datalist)
-        df.to_csv(pathname, index=False, header=False, mode='w')
+        v and print('\t' * gesture_index, gesture)
+        v and (not(i % group_size) and print(_END_, end=''))
 
-    dataset_to_csv(ml_1, destination_path, "ml_1")
-    dataset_to_csv(ml_2, destination_path, "ml_2")
+        i += 1
+
+    print(gestures_groups)
+    return gestures_groups
+
+def ml_gen(_data_values, _data_keys, group_size=5, ml_qty=3):
+    gestures_groups = group_gen(group_size, group_qty=ml_qty)
+
+    ml_groups, ml_objects = [], []
+    for k in range(ml_qty):
+        ml_groups.append(list())
+
+    for i, key in enumerate(_data_keys):
+        gesture_data = np.concatenate((_data_values[i], key), axis=None)
+        for ml_nb in range(ml_qty):
+            if key in gestures_groups[ml_nb]:
+                ml_groups[ml_nb].append(gesture_data)
+
+    for j in range(ml_qty):
+        save_path = "many_ml/ml_" + str(j+1)
+        dataset_to_csv(ml_groups[j], save_path)
+        ml_objects.append(MLObject(save_path, _save_dir + save_path + "/dataset.csv").train().evaluate().save())
+
+    return ml_objects, ml_groups
 
 
-# Dual ML has 80% accuracy
-if __name__ == "__main__":
-    data_path = "saved_model/dual_ml/datasets/"
-    data_name = "suyash10gpieday.csv"
+def predict(ml_objects, in_data, group_size=5, ml_qty=3):
+    _pred, _conf = [], []
+    for j in range(ml_qty):
+        tmp_pred, tmp_conf = ml_objects[j].predict(in_data)
+        _pred.append(tmp_pred)
+        _conf.append(tmp_conf)
 
-    data_divider(data_name, data_path)
+    # FIXME: Will lead to false positive when one of the ml lack gesture diversity
+    # TODO: Could be resolved by calculating the sum of all conf for each gesture and using the highest sum
+    # However, each conf gesture must all have the same number of input, and all gestures must be represented equally
+    k_winner, best_conf = 0, 0
+    for k in range(ml_qty):
+        max_conf = max(_conf[k][0])
+        if max_conf > best_conf:
+            best_conf = max_conf
+            k_winner = k
+    return _pred[k_winner]
+
+
+def data_remover(_data_values, _data_keys):
+    values_temp, keys_temp = [], []
+    for i, data_key in enumerate(_data_keys):
+        if not (data_key in handRemoved):
+            keys_temp.append(data_key)
+            values_temp.append(_data_values[i])
+    return values_temp, keys_temp
+
+
+def cpu_limit():
+    # For some reason, limiting Python to a single thread improve speed by a lot
+    os.environ["OMP_NUM_THREADS"] = "1"  # export OMP_NUM_THREADS=4
+    os.environ["OPENBLAS_NUM_THREADS"] = "1"  # export OPENBLAS_NUM_THREADS=4
+    os.environ["MKL_NUM_THREADS"] = "1"  # export MKL_NUM_THREADS=6
+    os.environ["VECLIB_MAXIMUM_THREADS"] = "1"  # export VECLIB_MAXIMUM_THREADS=4
+    os.environ["NUMEXPR_NUM_THREADS"] = "1"  # export NUMEXPR_NUM_THREADS=6
+    os.environ["BLIS_NUM_THREADS"] = "1"
+    os.environ["NUMBER_OF_PROCESSORS"] = "1"
+
+
+def initialize(dataset_path, model_size=5, model_qty=3):
+    # Format and cleanup dataset
+    _data_values, _data_keys = data_extractor(dataset_path)
+    _data_values, _data_keys = data_remover(_data_values, _data_keys)
 
     # Creating many ML models
-    model_1, scaler_1 = ml_object("dual_ml/ml_1", dataset_name="ml_1", dataset_path=data_path)
-    model_2, scaler_2 = ml_object("dual_ml/ml_2", dataset_name="ml_2", dataset_path=data_path)
+    model_qty = 3  # 3
+    model_size = 5  # 5
+    ml_objects, ml_groups = ml_gen(_data_values, _data_keys, group_size=model_size, ml_qty=model_qty)
 
-    data_keys, data_values = data_extractor(data_name)
-    keys_temp = []
-    values_temp = []
-    for i, data_key in enumerate(data_keys):
-        if data_key == 'handPeace' or data_key == 'handRock':
-            pass
-        else:
-            keys_temp.append(data_keys[i])
-            values_temp.append(data_values[i])
-    data_keys = keys_temp
-    data_values = values_temp
+    return ml_objects
+
+
+def launch():
+    cpu_limit()
+
+    dataset_path = "../csv/suyashretry.csv"
+
+    # INITIALIZE START #
+    # Format and cleanup dataset
+    _data_values, _data_keys = data_extractor(dataset_path)
+    _data_values, _data_keys = data_remover(_data_values, _data_keys)
+
+    # Creating many ML models
+    model_qty = 3  # 3
+    model_size = 5  # 5
+    ml_objects, ml_groups = ml_gen(_data_values, _data_keys, group_size=model_size, ml_qty=model_qty)
+    # INITIALIZE END #
 
     # Testing the model
-    data_len = len(data_values)
-    y_pred = [int] * data_len
-
+    data_len = len(_data_values)
+    y_pred = [list()] * data_len
     benchmark = []
 
     for i in range(data_len):
         start = time.time()
 
-        data_value = [data_values[i]]
-        pred_1, conf_1 = get_prediction(data_value, model_1, scaler_1)
-        pred_2, conf_2 = get_prediction(data_value, model_2, scaler_2)
-
-        if max(conf_1[0]) > max(conf_2[0]):
-            y_pred[i] = pred_1
-        else:
-            y_pred[i] = pred_2
+        x_true = [_data_values[i]]
+        y_pred[i] = predict(ml_objects, x_true, ml_qty=model_qty)
 
         end = time.time()
         benchmark.append(end - start)
         average = sum(benchmark) / len(benchmark)
         sys.stdout.write("\r{0} / {1} \t benchmark average = {2} (sec)".format(i, data_len - 1, average))
         sys.stdout.flush()
-
     sys.stdout.write("\n")
 
+    dataset_to_csv(pd.DataFrame(y_pred), "many_ml/predictions")
+
+    _data_values, y_pred = data_extractor(_save_dir + "many_ml/predictions/dataset.csv")
+
     # Display confusion matrix
-    ConfusionMatrixDisplay.from_predictions(data_keys, y_pred)
+    ConfusionMatrixDisplay.from_predictions(_data_keys[:-1], y_pred)
+    Path(_save_dir + "many_ml").mkdir(parents=True, exist_ok=True)
+    plt.savefig(_save_dir + "many_ml" + '/confusion_matrix.png')
     plt.show()
 
     # Printing the model accuracy
-    model_accuracy = accuracy_score(data_keys, y_pred)
+    model_accuracy = accuracy_score(_data_keys[:-1], y_pred)
     print("Total accuracy: ", model_accuracy)
+
+
+# Many ML has very high accuracy
+if __name__ == "__main__":
+    launch()
+
+
