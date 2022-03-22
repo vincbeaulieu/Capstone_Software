@@ -38,7 +38,7 @@ def my_callback(channel):
         if elapsed >= 6:
             buttonStatus(2)
             print("button status 2")
-        if elapsed >= 0.1:
+        elif elapsed >= 0.1:
             buttonStatus(1)
             print("Button status 1")
         else:

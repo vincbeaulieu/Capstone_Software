@@ -10,10 +10,13 @@ import RPi.GPIO as GPIO
 import os.path
 from buttonTest import buttonStatus
 from ml.dual_ml import initialize, predict
+from led import set_light_on, set_light_off
 
 # NOTE: This is already declared in buttonTest.py
 GPIO.setmode(GPIO.BCM)  # Use physical pin numbering
 GPIO.setup(15, GPIO.IN, pull_up_down=GPIO.PUD_DOWN)  # Set pin 10 to be an input pin
+GPIO.setup(8, GPIO.OUT, initial=GPIO.LOW)  # Red
+GPIO.setup(7, GPIO.OUT, initial=GPIO.LOW)  # Green
 
 q1 = multiprocessing.Queue()
 q2 = multiprocessing.Queue()
@@ -24,6 +27,7 @@ handRemoved = ['handPeace', 'handRock', 'handOk', 'handFlip', 'handExit']
 gestures = [g for g in gestures_list if g not in handRemoved]
 gesture_counters = [0] * len(gestures)
 hf = HapticFeedback('/dev/ttyUSB0', 9600)
+
 
 def print_error(exception):
     _RED_ = '\033[91m'
@@ -65,7 +69,6 @@ def launch():
                 num_lines = sum(1 for line in open(file_pathname))
                 if num_lines < 100:
                     calibrate(file_pathname)
-            # print('>>> PATH: ' + filepathname)
                 else:
                     # File is already populated. Therefore, load a model
                     # TODO: Load a ML model, ml_class is not completely ready. Testing is require.
@@ -78,7 +81,9 @@ def launch():
             print_error(e)
 
         # classifier, scaler = train_model(ml_model, file_pathname)
+        set_light_on("both")
         ml_objects = initialize(file_pathname, model_size, model_qty)
+        set_light_off("both")
 
         while True:
             if buttonStatus() in (1,2):
@@ -88,11 +93,14 @@ def launch():
                         file.writelines("")
                     calibrate(file_pathname)
                     # classifier, scaler = train_model(ml_model, file_pathname)
+                    set_light_on("both")
                     ml_objects = initialize(file_pathname, model_size, model_qty)
+                    set_light_off("both")
                     buttonStatus(0)
                 except Exception as e:
                     print_error(e)
 
+            set_light_on("g")
             emg1, emg2 = get_myoband_data(q1, q2)
             emg_data = [emg1 + emg2]
             # predicted = get_prediction(emg_data, classifier, scaler)
@@ -124,12 +132,14 @@ def launch():
         hf.terminate()
         hf.join()
         p.join()
+        set_light_off("both")
         GPIO.cleanup()
 
 
 # Creates the dataset in the csv folder. Returns the path of the file relative to
 # the top directory of the project (returns path like "csv/<filename>.csv)
 def calibrate(filepath):
+    set_light_on("r")
     buttonStatus(0)
     hf.disable()
     print("Starting data collection for calibration...")
@@ -139,7 +149,7 @@ def calibrate(filepath):
             print('Please perform the following gesture: ' + str(gesture))
             motion(gesture)
 
-            while buttonStatus() != 1:
+            while buttonStatus() == 0:
                 pass
             buttonStatus(0)
             # TODO: light led up
@@ -161,13 +171,10 @@ def calibrate(filepath):
     # TODO: LED blink twice
     print("Data collection complete. Dataset file created")
     hf.enable()
+    set_light_off("r")
 
 
 if __name__ == '__main__':
     launch()
     pass
 
-
-=======
-   test()
->>>>>>> main
