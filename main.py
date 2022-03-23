@@ -30,17 +30,19 @@ hf = HapticFeedback('/dev/ttyUSB0', 9600)
 
 
 def most_frequent(List):
-    startM_F=time()
+    # startM_F=time()
     counter = 0
     element = List[0]
 
     for i in List:
         curr_frequency = List.count(i)
-        if (curr_frequency > counter):
+        if (curr_frequency >=counter):
             counter = curr_frequency
             element = i
-    endM_F=time()
-    print("most frequent element time delay",(endM_F-startM_F))
+    # endM_F=time()
+    # print("most frequent element time delay",(endM_F-startM_F))
+
+    # the average time for list len=16 is 9.632110595703125e-05 s  therefore it is negligeable
 
     return element
 
@@ -175,7 +177,7 @@ def calibrate(filepath):
     hf.disable()
     print("Starting data collection for calibration...")
     secs = 1
-    for x in range(1):
+    for x in range(3):
         for gesture in gestures:
 
             print('Please perform the following gesture: ' + str(gesture))
