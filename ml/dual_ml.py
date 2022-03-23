@@ -113,7 +113,7 @@ def load(ml_qty):
         save_path = "many_ml/ml_" + str(j+1)
         ml_objects.append(ml.ml_class.load_model(save_path))
 
-    return ml_objects
+    return ml_objects[0]
 
 
 
