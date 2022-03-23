@@ -69,9 +69,7 @@ def launch():
             if os.path.isfile(file_pathname):
                 num_lines = sum(1 for line in open(file_pathname))
                 if num_lines < 100:
-                    calibrate(file_pathname)
-
-                    ml_objects = initialize(file_pathname, model_size, model_qty)
+                    raise "File doesn't exist"
 
                 else:
                     # File is already populated. Therefore, load a model
@@ -82,13 +80,15 @@ def launch():
                 calibrate(file_pathname)  # handle the creation of the dataset
 
         except Exception as e:
+            calibrate(file_pathname)
+            ml_objects = initialize(file_pathname, model_size, model_qty)
             print_error(e)
 
         set_light_off("both")
         # classifier, scaler = train_model(ml_model, file_pathname)
 
         while True:
-            if buttonStatus() in 2:
+            if buttonStatus() == 2:
                 try:
                     # Erase all the content of the file
                     with open(file_pathname, 'w') as file:
