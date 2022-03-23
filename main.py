@@ -64,6 +64,7 @@ def launch():
     p = multiprocessing.Process(target=read_myoband_data, args=(q1, q2,))
     try:
         p.start()
+        sleep(5)
         try:
             if os.path.isfile(file_pathname):
                 num_lines = sum(1 for line in open(file_pathname))
@@ -87,7 +88,7 @@ def launch():
         # classifier, scaler = train_model(ml_model, file_pathname)
 
         while True:
-            if buttonStatus() in (1, 2):
+            if buttonStatus() in 2:
                 try:
                     # Erase all the content of the file
                     with open(file_pathname, 'w') as file:
@@ -104,8 +105,8 @@ def launch():
                     print_error(e)
 
             set_light_on("g")
+
             emg1, emg2 = get_myoband_data(q1, q2)
-            # predicted = get_prediction(emg_data, classifier, scaler)
 
             t0 = time()
             predicted = predict(ml_objects, [emg1 + emg2], model_size, model_qty)
@@ -148,16 +149,16 @@ def calibrate(filepath):
     buttonStatus(0)
     hf.disable()
     print("Starting data collection for calibration...")
-    secs = 0.5
+    secs = 2
     for x in range(6):
         for gesture in gestures:
+
             print('Please perform the following gesture: ' + str(gesture))
             motion(gesture)
 
             while buttonStatus() == 0:
                 pass
             buttonStatus(0)
-            # TODO: light led up
 
             start_time = time()
             myo_data = []
@@ -171,9 +172,13 @@ def calibrate(filepath):
             print("Gesture collection done... writing to file")
             df = pd.DataFrame(myo_data)
             df.to_csv(filepath, index=False, header=False, mode='a')
-            # TODO: close led
 
-    # TODO: LED blink twice
+            for _ in range(2):
+                set_light_off("r")
+                sleep(0.25)
+                set_light_on("r")
+                sleep(0.25)
+
     print("Data collection complete. Dataset file created")
     hf.enable()
     set_light_off("r")
