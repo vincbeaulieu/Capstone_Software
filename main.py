@@ -70,14 +70,11 @@ def launch():
                 num_lines = sum(1 for line in open(file_pathname))
                 if num_lines < 100:
                     raise "File doesn't exist"
-
                 else:
                     # File is already populated. Therefore, load a model
                     ml_objects = load(model_qty)
-                    pass
             else:
-                # if file doesn't exist
-                calibrate(file_pathname)  # handle the creation of the dataset
+                raise "File doesn't exist"
 
         except Exception as e:
             calibrate(file_pathname)
