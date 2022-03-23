@@ -46,7 +46,7 @@ def launch():
     file_pathname = filepath + filename
 
     # Creating many ML models
-    model_qty = 3  # 3
+    model_qty = 2  # 3
     model_size = 5  # 5
     ml_objects = None
 
