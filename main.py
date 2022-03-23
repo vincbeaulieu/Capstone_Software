@@ -23,7 +23,7 @@ q2 = multiprocessing.Queue()
 
 # gestures = list(gestures_positions.keys())
 
-handRemoved = ['handPeace', 'handRock', 'handOk', 'handFlip', 'handExit']
+handRemoved = ['handPeace', 'handPinky', 'handRing', 'handFlip', 'handExit']
 gestures = [g for g in gestures_list if g not in handRemoved]
 gesture_counters = [0] * len(gestures)
 hf = HapticFeedback('/dev/ttyUSB0', 9600)
