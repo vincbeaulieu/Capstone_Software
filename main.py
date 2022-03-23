@@ -104,9 +104,10 @@ def launch():
             set_light_on("g")
 
             emg1, emg2 = get_myoband_data(q1, q2)
+            emg_data = [emg2 + emg1]
 
             t0 = time()
-            predicted = predict(ml_objects, [emg1 + emg2], model_qty)
+            predicted = predict(ml_objects, emg_data, model_qty)
             t1 = time()
 
             print("prediction: ", predicted)
