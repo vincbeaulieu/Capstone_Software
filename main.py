@@ -81,7 +81,6 @@ def launch():
             calibrate(file_pathname)
             ml_objects = initialize(file_pathname, model_size, model_qty)
 
-
         set_light_off("both")
         # classifier, scaler = train_model(ml_model, file_pathname)
 

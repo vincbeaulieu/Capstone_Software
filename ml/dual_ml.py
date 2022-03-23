@@ -17,7 +17,7 @@ from ml.MLObject import MLObject
 from rbpi.gestures import gestures_list
 
 # Save and load location
-_save_dir = "saved_model/"
+_save_dir = "ml/saved_model/"
 
 handRemoved = ['handPeace', 'handPinky', 'handRing', 'handFlip', 'handExit']
 gestures = [g for g in gestures_list if g not in handRemoved]
@@ -144,7 +144,7 @@ def initialize(dataset_path, model_size=5, model_qty=3):
 def launch():
     cpu_limit()
 
-    dataset_path = "../csv/suyashretry.csv"
+    dataset_path = "../csv/dataset.csv"
 
     # INITIALIZE START #
     # Format and cleanup dataset
