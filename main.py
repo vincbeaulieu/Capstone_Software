@@ -9,7 +9,7 @@ from rbpi.haptic_feedback import HapticFeedback
 import RPi.GPIO as GPIO
 import os.path
 from buttonTest import buttonStatus
-from ml.dual_ml import initialize, predict
+from ml.dual_ml import initialize, predict, load
 from led import set_light_on, set_light_off
 
 # NOTE: This is already declared in buttonTest.py
@@ -56,10 +56,12 @@ def launch():
     # ml_model = KNeighborsClassifier(n_neighbors=5, metric='minkowski', p=2)
 
     # Haptic feedback initialization
-    hf.start() # Disabled by default
-
+    hf.start()  # Disabled by default
 
     print("Starting myoband connection...")
+
+    set_light_on("both")
+
     p = multiprocessing.Process(target=read_myoband_data, args=(q1, q2,))
     try:
         p.start()
@@ -69,9 +71,12 @@ def launch():
                 num_lines = sum(1 for line in open(file_pathname))
                 if num_lines < 100:
                     calibrate(file_pathname)
+
+                    ml_objects = initialize(file_pathname, model_size, model_qty)
+
                 else:
                     # File is already populated. Therefore, load a model
-                    # TODO: Load a ML model, ml_class is not completely ready. Testing is require.
+                    ml_objects = load(model_qty)
                     pass
             else:
                 # if file doesn't exist
@@ -80,51 +85,53 @@ def launch():
         except Exception as e:
             print_error(e)
 
-        # classifier, scaler = train_model(ml_model, file_pathname)
-        set_light_on("both")
-        ml_objects = initialize(file_pathname, model_size, model_qty)
         set_light_off("both")
+        # classifier, scaler = train_model(ml_model, file_pathname)
 
         while True:
-            if buttonStatus() in (1,2):
+            if buttonStatus() in (1, 2):
                 try:
-                # Erase all the content of the file
+                    # Erase all the content of the file
                     with open(file_pathname, 'w') as file:
                         file.writelines("")
                     calibrate(file_pathname)
                     # classifier, scaler = train_model(ml_model, file_pathname)
+
                     set_light_on("both")
                     ml_objects = initialize(file_pathname, model_size, model_qty)
                     set_light_off("both")
+
                     buttonStatus(0)
                 except Exception as e:
                     print_error(e)
 
             set_light_on("g")
             emg1, emg2 = get_myoband_data(q1, q2)
-            emg_data = [emg1 + emg2]
             # predicted = get_prediction(emg_data, classifier, scaler)
+
             t0 = time()
-            predicted = predict(ml_objects, emg_data, model_size, model_qty)
+            predicted = predict(ml_objects, [emg1 + emg2], model_size, model_qty)
             t1 = time()
-            print("prediction: ",predicted)
+
+            print("prediction: ", predicted)
             print("Prediction time ", (t1-t0))
             motion(predicted[0])
-            prediction_buffer = 1
-#            if len(q3) >= prediction_buffer:
-#                counter_index = gesture_counters.index(max(gesture_counters))
 
-                # Perform the motion on the prosthetic
-#                motion(gestures[counter_index])
-#                print(gestures[counter_index])
-
-#                q3.clear()
-#                gesture_counters = [0] * len(gestures)
-#            else:
-#                prediction = predicted[0]
-#                q3.append(prediction)
-#                counter_index = gestures.index(prediction)
-#                gesture_counters[counter_index] += 1
+            # prediction_buffer = 1
+            # if len(q3) >= prediction_buffer:
+            #    counter_index = gesture_counters.index(max(gesture_counters))
+            #
+            #     Perform the motion on the prosthetic
+            #    motion(gestures[counter_index])
+            #    print(gestures[counter_index])
+            #
+            #    q3.clear()
+            #    gesture_counters = [0] * len(gestures)
+            # else:
+            #    prediction = predicted[0]
+            #    q3.append(prediction)
+            #    counter_index = gestures.index(prediction)
+            #    gesture_counters[counter_index] += 1
 
     except KeyboardInterrupt:
         motion("handExit")
@@ -144,7 +151,7 @@ def calibrate(filepath):
     hf.disable()
     print("Starting data collection for calibration...")
     secs = 0.5
-    for x in range (6):
+    for x in range(6):
         for gesture in gestures:
             print('Please perform the following gesture: ' + str(gesture))
             motion(gesture)

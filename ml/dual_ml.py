@@ -10,6 +10,7 @@ from pathlib import Path
 
 from sklearn.metrics import ConfusionMatrixDisplay, accuracy_score
 
+import ml.ml_class
 from ml.ml_class import data_extractor, dataset_to_csv
 from ml.MLObject import MLObject
 
@@ -103,6 +104,17 @@ def data_remover(_data_values, _data_keys):
             keys_temp.append(data_key)
             values_temp.append(_data_values[i])
     return values_temp, keys_temp
+
+
+def load(ml_qty=3):
+    ml_objects = []
+
+    for j in range(ml_qty):
+        save_path = "many_ml/ml_" + str(j+1) + "/dataset.csv"
+        ml_objects.append(ml.ml_class.load_model(save_path))
+
+    return ml_objects
+
 
 
 def cpu_limit():
