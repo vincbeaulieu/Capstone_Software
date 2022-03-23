@@ -46,6 +46,7 @@ class MLObject:
 
     def load(self, model_dirname):
         self.model, self.scaler = load_model(model_dirname)
+        self.ml_object = [self.model, self.scaler]
         return self
 
     def print_stats(self):
