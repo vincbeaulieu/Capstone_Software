@@ -17,7 +17,7 @@ from ml.MLObject import MLObject
 from rbpi.gestures import gestures_list
 
 # Save and load location
-_save_dir = "ml/saved_model/"
+_save_dir = "saved_model/"
 
 handRemoved = ['handPeace', 'handPinky', 'handRing', 'handFlip', 'handExit']
 gestures = [g for g in gestures_list if g not in handRemoved]
@@ -78,7 +78,7 @@ def ml_gen(_data_values, _data_keys, group_size=5, ml_qty=3):
     return ml_objects, ml_groups
 
 
-def predict(ml_objects, in_data, group_size=5, ml_qty=3):
+def predict(ml_objects, in_data, ml_qty=3):
     _pred, _conf = [], []
     for j in range(ml_qty):
         tmp_pred, tmp_conf = ml_objects[j].predict(in_data)

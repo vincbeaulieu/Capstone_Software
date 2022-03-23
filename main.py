@@ -1,3 +1,4 @@
+import ml.dual_ml
 from myoband.MyoBandData import read_myoband_data, get_myoband_data
 from rbpi.servoGestureOutput import motion
 from rbpi.gestures import gestures_list
@@ -9,7 +10,7 @@ from rbpi.haptic_feedback import HapticFeedback
 import RPi.GPIO as GPIO
 import os.path
 from buttonTest import buttonStatus
-from ml.dual_ml import initialize, predict, load, cpu_limit
+from ml.dual_ml import initialize, predict, load, cpu_limit, handRemoved
 from led import set_light_on, set_light_off
 
 # NOTE: This is already declared in buttonTest.py
@@ -23,7 +24,6 @@ q2 = multiprocessing.Queue()
 
 # gestures = list(gestures_positions.keys())
 
-handRemoved = ['handPeace', 'handPinky', 'handRing', 'handFlip', 'handExit']
 gestures = [g for g in gestures_list if g not in handRemoved]
 gesture_counters = [0] * len(gestures)
 hf = HapticFeedback('/dev/ttyUSB0', 9600)
@@ -77,9 +77,10 @@ def launch():
                 raise "File doesn't exist"
 
         except Exception as e:
+            print_error(str(e))
             calibrate(file_pathname)
             ml_objects = initialize(file_pathname, model_size, model_qty)
-            print_error(e)
+
 
         set_light_off("both")
         # classifier, scaler = train_model(ml_model, file_pathname)
@@ -106,7 +107,7 @@ def launch():
             emg1, emg2 = get_myoband_data(q1, q2)
 
             t0 = time()
-            predicted = predict(ml_objects, [emg1 + emg2], model_size, model_qty)
+            predicted = predict(ml_objects, [emg1 + emg2], model_qty)
             t1 = time()
 
             print("prediction: ", predicted)
