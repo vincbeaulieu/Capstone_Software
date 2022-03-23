@@ -12,7 +12,7 @@ from myoband.MyoBandData import read_myoband_data, get_myoband_data
 import multiprocessing
 
 # Save and load location
-_save_dir = "saved_model/"
+_save_dir = "ml/saved_model/"
 
 
 # Save reformatted dataset to csv
@@ -139,7 +139,7 @@ def launch():
     ml_model = KNeighborsClassifier(n_neighbors=5, metric='minkowski', p=2)
 
     # Train the ML model
-    dataset_path = "../csv/suyash10gpieday.csv"
+    dataset_path = "../csv/dataset.csv"
     ml_object, dataset = train_model(ml_model, dataset_path)
     in_train, in_test, out_train, out_test = dataset
 

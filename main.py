@@ -1,3 +1,4 @@
+import ml.dual_ml
 from myoband.MyoBandData import read_myoband_data, get_myoband_data
 from rbpi.servoGestureOutput import motion
 from rbpi.gestures import gestures_list
@@ -9,7 +10,7 @@ from rbpi.haptic_feedback import HapticFeedback
 import RPi.GPIO as GPIO
 import os.path
 from buttonTest import buttonStatus
-from ml.dual_ml import initialize, predict
+from ml.dual_ml import initialize, predict, load, cpu_limit, handRemoved
 from led import set_light_on, set_light_off
 
 # NOTE: This is already declared in buttonTest.py
@@ -23,7 +24,6 @@ q2 = multiprocessing.Queue()
 
 # gestures = list(gestures_positions.keys())
 
-handRemoved = ['handPeace', 'handRock', 'handOk', 'handFlip', 'handExit']
 gestures = [g for g in gestures_list if g not in handRemoved]
 gesture_counters = [0] * len(gestures)
 hf = HapticFeedback('/dev/ttyUSB0', 9600)
@@ -39,7 +39,6 @@ def launch():
     # Variable declarations:
     global gesture_counters
     buttonStatus(0)
-    q3 = []
 
     # Defining filepath of the dataset (Will be simplified later tonight)
     filepath = "csv/"
@@ -47,8 +46,8 @@ def launch():
     file_pathname = filepath + filename
 
     # Creating many ML models
-    model_qty = 3  # 3
-    model_size = 5  # 5
+    model_qty = 1
+    model_size = 6
     ml_objects = None
 
     # Import and create a ML model
@@ -56,10 +55,12 @@ def launch():
     # ml_model = KNeighborsClassifier(n_neighbors=5, metric='minkowski', p=2)
 
     # Haptic feedback initialization
-    hf.start() # Disabled by default
-
+    hf.start()  # Disabled by default
 
     print("Starting myoband connection...")
+
+    set_light_on("both")
+
     p = multiprocessing.Process(target=read_myoband_data, args=(q1, q2,))
     try:
         p.start()
@@ -68,63 +69,66 @@ def launch():
             if os.path.isfile(file_pathname):
                 num_lines = sum(1 for line in open(file_pathname))
                 if num_lines < 100:
-                    calibrate(file_pathname)
+                    raise "File doesn't exist"
                 else:
                     # File is already populated. Therefore, load a model
-                    # TODO: Load a ML model, ml_class is not completely ready. Testing is require.
-                    pass
+                    ml_objects = load(model_qty)
             else:
-                # if file doesn't exist
-                calibrate(file_pathname)  # handle the creation of the dataset
+                raise "File doesn't exist"
 
         except Exception as e:
-            print_error(e)
+            print_error(str(e))
+            calibrate(file_pathname)
+            ml_objects = initialize(file_pathname, model_size, model_qty)
 
-        # classifier, scaler = train_model(ml_model, file_pathname)
-        set_light_on("both")
-        ml_objects = initialize(file_pathname, model_size, model_qty)
         set_light_off("both")
+        # classifier, scaler = train_model(ml_model, file_pathname)
 
         while True:
-            if buttonStatus() in (1,2):
+            if buttonStatus() == 2:
                 try:
-                # Erase all the content of the file
+                    # Erase all the content of the file
                     with open(file_pathname, 'w') as file:
                         file.writelines("")
                     calibrate(file_pathname)
                     # classifier, scaler = train_model(ml_model, file_pathname)
+
                     set_light_on("both")
                     ml_objects = initialize(file_pathname, model_size, model_qty)
                     set_light_off("both")
+
                     buttonStatus(0)
                 except Exception as e:
                     print_error(e)
 
             set_light_on("g")
+
             emg1, emg2 = get_myoband_data(q1, q2)
-            emg_data = [emg1 + emg2]
-            # predicted = get_prediction(emg_data, classifier, scaler)
+            emg_data = [emg2 + emg1]
+
             t0 = time()
-            predicted = predict(ml_objects, emg_data, model_size, model_qty)
+            predicted = predict(ml_objects, emg_data, model_qty)
             t1 = time()
-            print("prediction: ",predicted)
+
+            print("prediction: ", predicted)
             print("Prediction time ", (t1-t0))
             motion(predicted[0])
-            prediction_buffer = 1
-#            if len(q3) >= prediction_buffer:
-#                counter_index = gesture_counters.index(max(gesture_counters))
 
-                # Perform the motion on the prosthetic
-#                motion(gestures[counter_index])
-#                print(gestures[counter_index])
-
-#                q3.clear()
-#                gesture_counters = [0] * len(gestures)
-#            else:
-#                prediction = predicted[0]
-#                q3.append(prediction)
-#                counter_index = gestures.index(prediction)
-#                gesture_counters[counter_index] += 1
+            # prediction_buffer = 1
+            # if len(q3) >= prediction_buffer:
+            #    counter_index = gesture_counters.index(max(gesture_counters))
+            #
+            #     Perform the motion on the prosthetic
+            #    motion(gestures[counter_index])
+            #    print(gestures[counter_index])
+            #
+            #    q3.clear()
+            #    gesture_counters = [0] * len(gestures)
+            # else:
+            #    prediction = predicted[0]
+            #    q3.append(prediction)
+            #    counter_index = gestures.index(prediction)
+            #    gesture_counters[counter_index] += 1
 
     except KeyboardInterrupt:
         motion("handExit")
@@ -143,16 +147,16 @@ def calibrate(filepath):
     buttonStatus(0)
     hf.disable()
     print("Starting data collection for calibration...")
-    secs = 0.5
-    for x in range (6):
+    secs = 1
+    for x in range(1):
         for gesture in gestures:
+
             print('Please perform the following gesture: ' + str(gesture))
             motion(gesture)
 
             while buttonStatus() == 0:
                 pass
             buttonStatus(0)
-            # TODO: light led up
 
             start_time = time()
             myo_data = []
@@ -166,15 +170,20 @@ def calibrate(filepath):
             print("Gesture collection done... writing to file")
             df = pd.DataFrame(myo_data)
             df.to_csv(filepath, index=False, header=False, mode='a')
-            # TODO: close led
 
-    # TODO: LED blink twice
+            for _ in range(2):
+                set_light_off("r")
+                sleep(0.25)
+                set_light_on("r")
+                sleep(0.25)
+
     print("Data collection complete. Dataset file created")
     hf.enable()
     set_light_off("r")
 
 
 if __name__ == '__main__':
+    # cpu_limit()
     launch()
     pass
 

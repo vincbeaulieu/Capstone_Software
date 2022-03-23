@@ -10,26 +10,27 @@ from pathlib import Path
 
 from sklearn.metrics import ConfusionMatrixDisplay, accuracy_score
 
+import ml.ml_class
 from ml.ml_class import data_extractor, dataset_to_csv
 from ml.MLObject import MLObject
 
 from rbpi.gestures import gestures_list
 
 # Save and load location
-_save_dir = "saved_model/"
+_save_dir = "ml/saved_model/"
 
-handRemoved = ['handPeace', 'handRock', 'handOk', 'handFlip', 'handExit']
+handRemoved = ['handPeace', 'handPinky', 'handRing', 'handFlip', 'handExit']
 gestures = [g for g in gestures_list if g not in handRemoved]
 
 v = True  # verbose
-def group_gen(group_size=5, group_qty=3):
+def group_gen(group_size, group_qty):
+    global gestures
     gestures = gestures_list
     random.shuffle(gestures)
     print(gestures)
 
     # Remove unwanted gesture
     gestures = [g for g in gestures if g not in handRemoved]
-    gestures_len = len(gestures)
 
     gestures_groups = []
     tmp_list = []
@@ -38,7 +39,7 @@ def group_gen(group_size=5, group_qty=3):
         _GREEN_, _END_ = '\033[92m', '\033[0m'
         v and (not(i % group_size) and print(_GREEN_, end=''))
 
-        gesture_index = i % gestures_len
+        gesture_index = i % len(gestures)
         gesture = gestures[gesture_index]
 
         if i % group_size == 0:
@@ -56,7 +57,7 @@ def group_gen(group_size=5, group_qty=3):
     print(gestures_groups)
     return gestures_groups
 
-def ml_gen(_data_values, _data_keys, group_size=5, ml_qty=3):
+def ml_gen(_data_values, _data_keys, group_size, ml_qty):
     gestures_groups = group_gen(group_size, group_qty=ml_qty)
 
     ml_groups, ml_objects = [], []
@@ -77,7 +78,7 @@ def ml_gen(_data_values, _data_keys, group_size=5, ml_qty=3):
     return ml_objects, ml_groups
 
 
-def predict(ml_objects, in_data, group_size=5, ml_qty=3):
+def predict(ml_objects, in_data, ml_qty):
     _pred, _conf = [], []
     for j in range(ml_qty):
         tmp_pred, tmp_conf = ml_objects[j].predict(in_data)
@@ -105,6 +106,17 @@ def data_remover(_data_values, _data_keys):
     return values_temp, keys_temp
 
 
+def load(ml_qty):
+    ml_objects = []
+
+    for j in range(ml_qty):
+        save_path = "many_ml/ml_" + str(j+1)
+        ml_objects.append(MLObject(save_path, _save_dir + save_path + "/dataset.csv").load(save_path))
+
+    return ml_objects
+
+
+
 def cpu_limit():
     # For some reason, limiting Python to a single thread improve speed by a lot
     os.environ["OMP_NUM_THREADS"] = "1"  # export OMP_NUM_THREADS=4
@@ -116,14 +128,12 @@ def cpu_limit():
     os.environ["NUMBER_OF_PROCESSORS"] = "1"
 
 
-def initialize(dataset_path, model_size=5, model_qty=3):
+def initialize(dataset_path, model_size, model_qty):
     # Format and cleanup dataset
     _data_values, _data_keys = data_extractor(dataset_path)
     _data_values, _data_keys = data_remover(_data_values, _data_keys)
 
     # Creating many ML models
-    model_qty = 3  # 3
-    model_size = 5  # 5
     ml_objects, ml_groups = ml_gen(_data_values, _data_keys, group_size=model_size, ml_qty=model_qty)
 
     return ml_objects
@@ -132,7 +142,7 @@ def initialize(dataset_path, model_size=5, model_qty=3):
 def launch():
     cpu_limit()
 
-    dataset_path = "../csv/suyashretry.csv"
+    dataset_path = "../csv/dataset.csv"
 
     # INITIALIZE START #
     # Format and cleanup dataset
