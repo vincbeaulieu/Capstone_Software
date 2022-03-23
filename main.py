@@ -9,7 +9,7 @@ from rbpi.haptic_feedback import HapticFeedback
 import RPi.GPIO as GPIO
 import os.path
 from buttonTest import buttonStatus
-from ml.dual_ml import initialize, predict, load
+from ml.dual_ml import initialize, predict, load, cpu_limit
 from led import set_light_on, set_light_off
 
 # NOTE: This is already declared in buttonTest.py
@@ -147,7 +147,7 @@ def calibrate(filepath):
     hf.disable()
     print("Starting data collection for calibration...")
     secs = 2
-    for x in range(6):
+    for x in range(1):
         for gesture in gestures:
 
             print('Please perform the following gesture: ' + str(gesture))
@@ -182,6 +182,7 @@ def calibrate(filepath):
 
 
 if __name__ == '__main__':
+    cpu_limit()
     launch()
     pass
 
