@@ -46,8 +46,8 @@ def launch():
     file_pathname = filepath + filename
 
     # Creating many ML models
-    model_qty = 2
-    model_size = 4
+    model_qty = 1
+    model_size = 6
     ml_objects = None
 
     # Import and create a ML model
@@ -182,7 +182,7 @@ def calibrate(filepath):
 
 
 if __name__ == '__main__':
-    cpu_limit()
+    # cpu_limit()
     launch()
     pass
 

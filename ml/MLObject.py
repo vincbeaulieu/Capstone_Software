@@ -29,7 +29,7 @@ class MLObject:
 
         # ML Classifier
         if ml_model is None:
-            ml_model = HistGradientBoostingClassifier(max_depth=5, )  # Best ML model found
+            ml_model = HistGradientBoostingClassifier(max_depth=None, )  # Best ML model found
         self.model = ml_model
         self.scaler = None
         self.ml_object = [self.model, self.scaler]
