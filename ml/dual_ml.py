@@ -111,9 +111,9 @@ def load(ml_qty):
 
     for j in range(ml_qty):
         save_path = "many_ml/ml_" + str(j+1)
-        ml_objects.append(ml.ml_class.load_model(save_path))
+        ml_objects.append(MLObject(save_path, _save_dir + save_path + "/dataset.csv").load(save_path))
 
-    return ml_objects[0]
+    return ml_objects
 
 
 
