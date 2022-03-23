@@ -23,14 +23,14 @@ handRemoved = ['handPeace', 'handPinky', 'handRing', 'handFlip', 'handExit']
 gestures = [g for g in gestures_list if g not in handRemoved]
 
 v = True  # verbose
-def group_gen(group_size=5, group_qty=3):
+def group_gen(group_size, group_qty):
+    global gestures
     gestures = gestures_list
     random.shuffle(gestures)
     print(gestures)
 
     # Remove unwanted gesture
     gestures = [g for g in gestures if g not in handRemoved]
-    gestures_len = len(gestures)
 
     gestures_groups = []
     tmp_list = []
@@ -39,7 +39,7 @@ def group_gen(group_size=5, group_qty=3):
         _GREEN_, _END_ = '\033[92m', '\033[0m'
         v and (not(i % group_size) and print(_GREEN_, end=''))
 
-        gesture_index = i % gestures_len
+        gesture_index = i % len(gestures)
         gesture = gestures[gesture_index]
 
         if i % group_size == 0:
@@ -57,7 +57,7 @@ def group_gen(group_size=5, group_qty=3):
     print(gestures_groups)
     return gestures_groups
 
-def ml_gen(_data_values, _data_keys, group_size=5, ml_qty=3):
+def ml_gen(_data_values, _data_keys, group_size, ml_qty):
     gestures_groups = group_gen(group_size, group_qty=ml_qty)
 
     ml_groups, ml_objects = [], []
@@ -78,7 +78,7 @@ def ml_gen(_data_values, _data_keys, group_size=5, ml_qty=3):
     return ml_objects, ml_groups
 
 
-def predict(ml_objects, in_data, ml_qty=3):
+def predict(ml_objects, in_data, ml_qty):
     _pred, _conf = [], []
     for j in range(ml_qty):
         tmp_pred, tmp_conf = ml_objects[j].predict(in_data)
@@ -106,7 +106,7 @@ def data_remover(_data_values, _data_keys):
     return values_temp, keys_temp
 
 
-def load(ml_qty=3):
+def load(ml_qty):
     ml_objects = []
 
     for j in range(ml_qty):
@@ -128,14 +128,12 @@ def cpu_limit():
     os.environ["NUMBER_OF_PROCESSORS"] = "1"
 
 
-def initialize(dataset_path, model_size=5, model_qty=3):
+def initialize(dataset_path, model_size, model_qty):
     # Format and cleanup dataset
     _data_values, _data_keys = data_extractor(dataset_path)
     _data_values, _data_keys = data_remover(_data_values, _data_keys)
 
     # Creating many ML models
-    model_qty = 3  # 3
-    model_size = 5  # 5
     ml_objects, ml_groups = ml_gen(_data_values, _data_keys, group_size=model_size, ml_qty=model_qty)
 
     return ml_objects

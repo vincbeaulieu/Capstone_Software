@@ -46,8 +46,8 @@ def launch():
     file_pathname = filepath + filename
 
     # Creating many ML models
-    model_qty = 2  # 3
-    model_size = 5  # 5
+    model_qty = 2
+    model_size = 4
     ml_objects = None
 
     # Import and create a ML model
@@ -146,7 +146,7 @@ def calibrate(filepath):
     buttonStatus(0)
     hf.disable()
     print("Starting data collection for calibration...")
-    secs = 2
+    secs = 1
     for x in range(1):
         for gesture in gestures:
 
