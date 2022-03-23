@@ -17,7 +17,7 @@ from ml.MLObject import MLObject
 from rbpi.gestures import gestures_list
 
 # Save and load location
-_save_dir = "saved_model/"
+_save_dir = "ml/saved_model/"
 
 handRemoved = ['handPeace', 'handPinky', 'handRing', 'handFlip', 'handExit']
 gestures = [g for g in gestures_list if g not in handRemoved]
