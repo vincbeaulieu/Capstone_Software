@@ -42,6 +42,9 @@ def group_gen(group_size, group_qty):
         gesture_index = i % len(gestures)
         gesture = gestures[gesture_index]
 
+        if group_nb * group_size / 2 < i:
+            random.shuffle(gestures)
+
         if i % group_size == 0:
             (i != 0) and gestures_groups.append(tmp_list)
             tmp_list = [gesture]
