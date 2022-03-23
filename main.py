@@ -132,7 +132,7 @@ def launch():
             # motion(predicted[0])
 
             predicted = predict(ml_objects, emg_data, model_qty)
-            if len(l)<=15:
+            if len(l)<10:
                 l.append(predicted[0])
             else:
                 del l[1]
