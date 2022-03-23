@@ -19,7 +19,7 @@ from rbpi.gestures import gestures_list
 # Save and load location
 _save_dir = "saved_model/"
 
-handRemoved = ['handPeace', 'handRock', 'handOk', 'handFlip', 'handExit']
+handRemoved = ['handPeace', 'handPinky', 'handRing', 'handFlip', 'handExit']
 gestures = [g for g in gestures_list if g not in handRemoved]
 
 v = True  # verbose
