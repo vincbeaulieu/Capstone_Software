@@ -39,7 +39,6 @@ def launch():
     # Variable declarations:
     global gesture_counters
     buttonStatus(0)
-    q3 = []
 
     # Defining filepath of the dataset (Will be simplified later tonight)
     filepath = "csv/"
@@ -65,7 +64,6 @@ def launch():
     p = multiprocessing.Process(target=read_myoband_data, args=(q1, q2,))
     try:
         p.start()
-        sleep(5)
         try:
             if os.path.isfile(file_pathname):
                 num_lines = sum(1 for line in open(file_pathname))
