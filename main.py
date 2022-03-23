@@ -18,7 +18,7 @@ GPIO.setmode(GPIO.BCM)  # Use physical pin numbering
 GPIO.setup(15, GPIO.IN, pull_up_down=GPIO.PUD_DOWN)  # Set pin 10 to be an input pin
 GPIO.setup(8, GPIO.OUT, initial=GPIO.LOW)  # Red
 GPIO.setup(7, GPIO.OUT, initial=GPIO.LOW)  # Green
-
+l=[]
 q1 = multiprocessing.Queue()
 q2 = multiprocessing.Queue()
 
@@ -28,6 +28,21 @@ gestures = [g for g in gestures_list if g not in handRemoved]
 gesture_counters = [0] * len(gestures)
 hf = HapticFeedback('/dev/ttyUSB0', 9600)
 
+
+def most_frequent(List):
+    startM_F=time()
+    counter = 0
+    element = List[0]
+
+    for i in List:
+        curr_frequency = List.count(i)
+        if (curr_frequency > counter):
+            counter = curr_frequency
+            element = i
+    endM_F=time()
+    print("most frequent element time delay",(endM_F-startM_F))
+
+    return element
 
 def print_error(exception):
     _RED_ = '\033[91m'
@@ -106,13 +121,25 @@ def launch():
             emg1, emg2 = get_myoband_data(q1, q2)
             emg_data = [emg2 + emg1]
 
-            t0 = time()
-            predicted = predict(ml_objects, emg_data, model_qty)
-            t1 = time()
+            # t0 = time()
+            # predicted = predict(ml_objects, emg_data, model_qty)
+            # t1 = time()
 
-            print("prediction: ", predicted)
-            print("Prediction time ", (t1-t0))
-            motion(predicted[0])
+            # print("prediction: ", predicted)
+            # print("Prediction time ", (t1-t0))
+            # motion(predicted[0])
+
+            predicted = predict(ml_objects, emg_data, model_qty)
+            if len(l)<=15:
+                l.append(predicted[0])
+            else:
+                del l[1]
+                l.append(predicted[0])
+                m_f_gesture=most_frequent(l)
+                print(m_f_gesture)
+                motion(m_f_gesture)
+
+
 
             # prediction_buffer = 1
             # if len(q3) >= prediction_buffer:
