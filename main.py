@@ -102,7 +102,6 @@ def launch():
 
         set_light_off("both")
         # classifier, scaler = train_model(ml_model, file_pathname)
-
         hf.enable()
         buffer_list = []
         while True:
@@ -111,6 +110,7 @@ def launch():
                     # Erase all the content of the file
                     with open(file_pathname, 'w') as file:
                         file.writelines("")
+                    hf.disable()
                     calibrate(file_pathname)
                     # classifier, scaler = train_model(ml_model, file_pathname)
 
@@ -118,6 +118,7 @@ def launch():
                     ml_objects = initialize(file_pathname, model_size, model_qty)
                     set_light_off("both")
 
+                    hf.enable()
                     buttonStatus(0)
                 except Exception as e:
                     print_error(e)
@@ -160,6 +161,7 @@ def launch():
             #    gesture_counters[counter_index] += 1
 
     except KeyboardInterrupt:
+        hf.disable()
         motion("handExit")
         p.terminate()
         hf.terminate()
@@ -174,7 +176,7 @@ def launch():
 def calibrate(filepath):
     set_light_on("r")
     buttonStatus(0)
-    hf.disable()
+    #hf.disable()
     print("Starting data collection for calibration...")
     secs = 3
     for x in range(1):
@@ -207,7 +209,7 @@ def calibrate(filepath):
                 sleep(0.25)
 
     print("Data collection complete. Dataset file created")
-    hf.enable()
+    #hf.enable()
     set_light_off("r")
 
 

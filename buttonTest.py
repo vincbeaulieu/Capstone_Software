@@ -33,14 +33,14 @@ def my_callback(channel):
         buttontoggle = False
 
         elapsed = time() - start
-        print(elapsed)
+        #print(elapsed)
 
         if elapsed >= 6:
             buttonStatus(2)
-            print("button status 2")
+           # print("button status 2")
         elif elapsed >= 0.1:
             buttonStatus(1)
-            print("Button status 1")
+            #print("Button status 1")
         else:
             print("button status 0")
             buttonStatus(0)
