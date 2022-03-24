@@ -19,7 +19,7 @@ GPIO.setup(15, GPIO.IN, pull_up_down=GPIO.PUD_DOWN)  # Set pin 10 to be an input
 GPIO.setup(8, GPIO.OUT, initial=GPIO.LOW)  # Red
 GPIO.setup(7, GPIO.OUT, initial=GPIO.LOW)  # Green
 
-l=[]
+l = []
 q1 = multiprocessing.Queue()
 q2 = multiprocessing.Queue()
 
@@ -28,9 +28,11 @@ q2 = multiprocessing.Queue()
 gestures = [g for g in gestures_list if g not in handRemoved]
 gesture_counters = [0] * len(gestures)
 hf = HapticFeedback('/dev/ttyUSB0', 9600)
+
+
 def most_frequent(List):
-#    print(List)
- #   startM_F=time()
+    #    print(List)
+    #   startM_F=time()
     counter = 0
     element = List[0]
 
@@ -39,8 +41,8 @@ def most_frequent(List):
         if (curr_frequency >= counter):
             counter = curr_frequency
             element = i
-  #  endM_F=time()
-   # print("most frequent element time delay",(endM_F-startM_F),"prediction",element)
+    #  endM_F=time()
+    # print("most frequent element time delay",(endM_F-startM_F),"prediction",element)
 
     return element
 
@@ -83,7 +85,7 @@ def launch():
         sleep(5)
         try:
             if os.path.isfile(file_pathname):
-                num_lines = sum(1 for line in open(file_pathname))
+                num_lines = sum(1 for _ in open(file_pathname))
                 if num_lines < 100:
                     raise "File doesn't exist"
                 else:
@@ -95,7 +97,9 @@ def launch():
         except Exception as e:
             print_error(str(e))
             calibrate(file_pathname)
-            ml_objects = initialize(file_pathname, model_size, model_qty)
+            ml_objects = initialize(file_pathname, model_size, model_qty,
+                                    [['handThumbsUp', 'handIndex', 'handRock', 'handOk'],
+                                     ['handOpen', 'handRelax', 'handClose']])
 
         set_light_off("both")
         # classifier, scaler = train_model(ml_model, file_pathname)
@@ -123,21 +127,21 @@ def launch():
             emg1, emg2 = get_myoband_data(q1, q2)
             emg_data = [emg2 + emg1]
 
-            #t0 = time()
+            # t0 = time()
             predicted = predict(ml_objects, emg_data, model_qty)
-           # t1 = time()
-            if len(l)<6:
+            # t1 = time()
+            if len(l) < 6:
                 l.append(predicted[0])
             else:
                 del l[0]
                 l.append(predicted[0])
-                m_f_gesture=most_frequent(l)
+                m_f_gesture = most_frequent(l)
                 print(m_f_gesture)
                 motion(m_f_gesture)
 
-            #print("prediction: ", predicted)
-            #print("Prediction time ", (t1-t0))
-            #motion(predicted[0])
+            # print("prediction: ", predicted)
+            # print("Prediction time ", (t1-t0))
+            # motion(predicted[0])
 
             # prediction_buffer = 1
             # if len(q3) >= prediction_buffer:
@@ -172,8 +176,8 @@ def calibrate(filepath):
     buttonStatus(0)
     hf.disable()
     print("Starting data collection for calibration...")
-    secs = 1
-    for x in range(3):
+    secs = 3
+    for x in range(1):
         for gesture in gestures:
 
             print('Please perform the following gesture: ' + str(gesture))
@@ -211,4 +215,3 @@ if __name__ == '__main__':
     # cpu_limit()
     launch()
     pass
-

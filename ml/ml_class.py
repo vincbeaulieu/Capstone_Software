@@ -12,7 +12,7 @@ from myoband.MyoBandData import read_myoband_data, get_myoband_data
 import multiprocessing
 
 # Save and load location
-_save_dir = "ml/saved_model/"
+_save_dir = "../ml/saved_model/"
 
 
 # Save reformatted dataset to csv

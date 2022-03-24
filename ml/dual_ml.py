@@ -10,14 +10,10 @@ from pathlib import Path
 
 from sklearn.metrics import ConfusionMatrixDisplay, accuracy_score
 
-import ml.ml_class
-from ml.ml_class import data_extractor, dataset_to_csv
+from ml.ml_class import data_extractor, dataset_to_csv, _save_dir
 from ml.MLObject import MLObject
 
 from rbpi.gestures import gestures_list
-
-# Save and load location
-_save_dir = "ml/saved_model/"
 
 handRemoved = ['handPeace', 'handPinky', 'handRing', 'handFlip', 'handExit']
 gestures = [g for g in gestures_list if g not in handRemoved]
@@ -60,8 +56,9 @@ def group_gen(group_size, group_qty):
     print(gestures_groups)
     return gestures_groups
 
-def ml_gen(_data_values, _data_keys, group_size, ml_qty):
-    gestures_groups = group_gen(group_size, group_qty=ml_qty)
+def ml_gen(_data_values, _data_keys, group_size, ml_qty, gestures_groups=None):
+    if gestures_groups is None:
+        gestures_groups = group_gen(group_size, group_qty=ml_qty)
 
     ml_groups, ml_objects = [], []
     for k in range(ml_qty):
@@ -131,13 +128,14 @@ def cpu_limit():
     os.environ["NUMBER_OF_PROCESSORS"] = "1"
 
 
-def initialize(dataset_path, model_size, model_qty):
+def initialize(dataset_path, model_size, model_qty, gest_groups=None):
     # Format and cleanup dataset
     _data_values, _data_keys = data_extractor(dataset_path)
     _data_values, _data_keys = data_remover(_data_values, _data_keys)
 
     # Creating many ML models
-    ml_objects, ml_groups = ml_gen(_data_values, _data_keys, group_size=model_size, ml_qty=model_qty)
+    ml_objects, ml_groups = ml_gen(_data_values, _data_keys, group_size=model_size, ml_qty=model_qty,
+                                   gestures_groups=gest_groups)
 
     return ml_objects
 
@@ -153,10 +151,12 @@ def launch():
     _data_values, _data_keys = data_remover(_data_values, _data_keys)
 
     # Creating many ML models
-    model_qty = 3  # 3
+    model_qty = 2  # 3
     model_size = 5  # 5
-    ml_objects, ml_groups = ml_gen(_data_values, _data_keys, group_size=model_size, ml_qty=model_qty)
+    # ml_objects, ml_groups = ml_gen(_data_values, _data_keys, group_size=model_size, ml_qty=model_qty)
     # INITIALIZE END #
+
+    ml_objects = load(model_qty)
 
     # Testing the model
     data_len = len(_data_values)
