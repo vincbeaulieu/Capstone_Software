@@ -19,7 +19,6 @@ GPIO.setup(15, GPIO.IN, pull_up_down=GPIO.PUD_DOWN)  # Set pin 10 to be an input
 GPIO.setup(8, GPIO.OUT, initial=GPIO.LOW)  # Red
 GPIO.setup(7, GPIO.OUT, initial=GPIO.LOW)  # Green
 
-l = []
 q1 = multiprocessing.Queue()
 q2 = multiprocessing.Queue()
 
@@ -105,6 +104,7 @@ def launch():
         # classifier, scaler = train_model(ml_model, file_pathname)
 
         hf.enable()
+        buffer_list = []
         while True:
             if buttonStatus() == 2:
                 try:
@@ -130,12 +130,12 @@ def launch():
             # t0 = time()
             predicted = predict(ml_objects, emg_data, model_qty)
             # t1 = time()
-            if len(l) < 6:
-                l.append(predicted[0])
+            if len(buffer_list) < 6:
+                buffer_list.append(predicted[0])
             else:
-                del l[0]
-                l.append(predicted[0])
-                m_f_gesture = most_frequent(l)
+                del buffer_list[0]
+                buffer_list.append(predicted[0])
+                m_f_gesture = most_frequent(buffer_list)
                 print(m_f_gesture)
                 motion(m_f_gesture)
 
