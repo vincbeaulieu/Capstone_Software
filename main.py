@@ -29,7 +29,8 @@ gestures = [g for g in gestures_list if g not in handRemoved]
 gesture_counters = [0] * len(gestures)
 hf = HapticFeedback('/dev/ttyUSB0', 9600)
 def most_frequent(List):
-    #startM_F=time()
+#    print(List)
+ #   startM_F=time()
     counter = 0
     element = List[0]
 
@@ -38,8 +39,8 @@ def most_frequent(List):
         if (curr_frequency >= counter):
             counter = curr_frequency
             element = i
-    #endM_F=time()
-    #print("most frequent element time delay",(endM_F-startM_F))
+  #  endM_F=time()
+   # print("most frequent element time delay",(endM_F-startM_F),"prediction",element)
 
     return element
 
@@ -125,7 +126,7 @@ def launch():
             #t0 = time()
             predicted = predict(ml_objects, emg_data, model_qty)
            # t1 = time()
-            if len(l)<13:
+            if len(l)<6:
                 l.append(predicted[0])
             else:
                 del l[0]
