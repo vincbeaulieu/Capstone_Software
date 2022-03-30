@@ -30,6 +30,8 @@ class MLObject:
         # ML Classifier
         if ml_model is None:
             ml_model = HistGradientBoostingClassifier()  # Best ML model found
+            #from sklearn.neighbors import KNeighborsClassifier
+            #ml_model = KNeighborsClassifier()
         self.model = ml_model
         self.scaler = None
         self.ml_object = [self.model, self.scaler]

@@ -140,7 +140,7 @@ def launch():
     _data_values, _data_keys = data_remover(_data_values, _data_keys)
 
     # Creating many ML models
-    model_qty = 3  # 3
+    model_qty = 2  # 3
     model_size = 5  # 5
     ml_objects, ml_groups = ml_gen(_data_values, _data_keys, group_size=model_size, ml_qty=model_qty)
     # INITIALIZE END #
