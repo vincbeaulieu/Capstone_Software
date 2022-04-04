@@ -4,6 +4,7 @@ void readSensors();
 void findMaxValue();
 void rumbleOn(int);
 void rumbleOff();
+void checkEnable();
 
 int valArray[5];
 int maxValue;
@@ -23,31 +24,16 @@ void loop() {
   serialRead = Serial.read();
   // Serial.println(serialRead);
 
-  if (serialRead == 1)
-  {
-    isEnabled = true;
-  }
-  else if(serialRead == 0)
-  {
-    isEnabled = false;
-  }
+  checkEnable();
  
   if (isEnabled)
   {
-    valueSum = 0;
-    for (size_t i = 0; i < 16; i++)
-    {
-      readSensors();
-      findMaxValue();
-      valueSum += maxValue;
-      delay(10);
-    }
-    
-    valueAvg = valueSum >> 4; // Divide by 16
+    readSensors();
+    findMaxValue();
 
-    if (valueAvg > 100)
+    if (maxValue > 100)
     {
-      valueOutput = 255 - map(valueAvg, 100, 1023, 190, 255);
+      valueOutput = 255 - map(maxValue, 100, 1023, 190, 255);
       rumbleOn(valueOutput);
     }
     else 
@@ -97,4 +83,16 @@ void rumbleOff()
   analogWrite(6, 255);
   // Serial.print("OFF, ");
   // Serial.println(maxValue);
+}
+
+void checkEnable()
+{
+  if (serialRead == 1)
+  {
+    isEnabled = true;
+  }
+  else if(serialRead == 0)
+  {
+    isEnabled = false;
+  }
 }
