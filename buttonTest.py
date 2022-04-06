@@ -3,6 +3,8 @@ import RPi.GPIO as GPIO
 
 # GPIO.setmode(GPIO.BCM)
 # GPIO.setup(15, GPIO.IN, pull_up_down=GPIO.PUD_DOWN)
+# GPIO.setmode(GPIO.BOARD)
+GPIO.setup('SPI1_SCK', GPIO.IN, pull_up_down=GPIO.PUD_DOWN)  # Button, pin 22
 
 global button_state
 global button_toggle 
@@ -21,7 +23,7 @@ def my_callback(channel):
     global start
     global buttontoggle
 
-    if GPIO.input(13) == 1:
+    if GPIO.input('SPI1_SCK') == 1:
         if buttontoggle == False:
             start = time()
             buttontoggle = True
@@ -46,6 +48,7 @@ def my_callback(channel):
             buttonStatus(0)
 
 # GPIO.add_event_detect(15, GPIO.BOTH, callback=my_callback, bouncetime=200)
+GPIO.add_event_detect('SPI1_SCK', GPIO.BOTH, callback=my_callback, bouncetime=200)
 
 if __name__ == '__main__':
     while True:

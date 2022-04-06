@@ -12,13 +12,9 @@ from buttonTest import buttonStatus, my_callback
 from ml.dual_ml import initialize, predict, load, cpu_limit, handRemoved
 from led import set_light_on, set_light_off
 
-# NOTE: This is already declared in buttonTest.py
-GPIO.cleanup()
-GPIO.setmode(GPIO.BCM)  # Use physical pin numbering
-GPIO.setup(13, GPIO.IN, pull_up_down=GPIO.PUD_DOWN)  # Set pin 10 to be an input pin
-GPIO.setup(19, GPIO.OUT, initial=GPIO.LOW)  # Red
-GPIO.setup(20, GPIO.OUT, initial=GPIO.LOW)  # Green
-GPIO.add_event_detect(13, GPIO.BOTH, callback=my_callback, bouncetime=200)
+# GPIO.setmode(GPIO.TEGRA_SOC)  # Use physical pin numbering
+
+
 
 q1 = multiprocessing.Queue()
 q2 = multiprocessing.Queue()
