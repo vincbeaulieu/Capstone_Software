@@ -143,7 +143,7 @@ def initialize(dataset_path, model_size, model_qty, gest_groups=None):
 def launch():
     cpu_limit()
 
-    dataset_path = "../csv/dataset.csv"
+    dataset_path = "csv/dataset.csv"
 
     # INITIALIZE START #
     # Format and cleanup dataset
@@ -153,10 +153,10 @@ def launch():
     # Creating many ML models
     model_qty = 2  # 3
     model_size = 5  # 5
-    # ml_objects, ml_groups = ml_gen(_data_values, _data_keys, group_size=model_size, ml_qty=model_qty)
+    ml_objects, ml_groups = ml_gen(_data_values, _data_keys, group_size=model_size, ml_qty=model_qty)
     # INITIALIZE END #
 
-    ml_objects = load(model_qty)
+    # ml_objects = load(model_qty)
 
     # Testing the model
     data_len = len(_data_values)

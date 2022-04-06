@@ -1,4 +1,3 @@
-import ml.dual_ml
 from myoband.MyoBandData import read_myoband_data, get_myoband_data
 from rbpi.servoGestureOutput import motion
 from rbpi.gestures import gestures_list
@@ -7,17 +6,19 @@ import pandas as pd
 import multiprocessing
 from time import sleep, time
 from rbpi.haptic_feedback import HapticFeedback
-import RPi.GPIO as GPIO
+import Jetson.GPIO as GPIO
 import os.path
-from buttonTest import buttonStatus
+from buttonTest import buttonStatus, my_callback
 from ml.dual_ml import initialize, predict, load, cpu_limit, handRemoved
 from led import set_light_on, set_light_off
 
 # NOTE: This is already declared in buttonTest.py
+GPIO.cleanup()
 GPIO.setmode(GPIO.BCM)  # Use physical pin numbering
-GPIO.setup(15, GPIO.IN, pull_up_down=GPIO.PUD_DOWN)  # Set pin 10 to be an input pin
-GPIO.setup(8, GPIO.OUT, initial=GPIO.LOW)  # Red
-GPIO.setup(7, GPIO.OUT, initial=GPIO.LOW)  # Green
+GPIO.setup(13, GPIO.IN, pull_up_down=GPIO.PUD_DOWN)  # Set pin 10 to be an input pin
+GPIO.setup(19, GPIO.OUT, initial=GPIO.LOW)  # Red
+GPIO.setup(20, GPIO.OUT, initial=GPIO.LOW)  # Green
+GPIO.add_event_detect(13, GPIO.BOTH, callback=my_callback, bouncetime=200)
 
 q1 = multiprocessing.Queue()
 q2 = multiprocessing.Queue()

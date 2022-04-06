@@ -1,8 +1,8 @@
 from time import sleep,time
 import RPi.GPIO as GPIO
 
-GPIO.setmode(GPIO.BCM)
-GPIO.setup(15, GPIO.IN, pull_up_down=GPIO.PUD_DOWN)
+# GPIO.setmode(GPIO.BCM)
+# GPIO.setup(15, GPIO.IN, pull_up_down=GPIO.PUD_DOWN)
 
 global button_state
 global button_toggle 
@@ -21,7 +21,7 @@ def my_callback(channel):
     global start
     global buttontoggle
 
-    if GPIO.input(15) == 1:
+    if GPIO.input(13) == 1:
         if buttontoggle == False:
             start = time()
             buttontoggle = True
@@ -45,7 +45,7 @@ def my_callback(channel):
             print("button status 0")
             buttonStatus(0)
 
-GPIO.add_event_detect(15, GPIO.BOTH, callback=my_callback, bouncetime=200)
+# GPIO.add_event_detect(15, GPIO.BOTH, callback=my_callback, bouncetime=200)
 
 if __name__ == '__main__':
     while True:

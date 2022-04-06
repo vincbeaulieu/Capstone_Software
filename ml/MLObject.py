@@ -24,9 +24,9 @@ class MLObject:
 
         # ML Classifier
         if ml_model is None:
-            #ml_model = HistGradientBoostingClassifier(max_depth=None, )  # Best ML model found
-            from sklearn.neighbors import KNeighborsClassifier
-            ml_model = KNeighborsClassifier(n_neighbors=5, metric='minkowski', p=2)
+            ml_model = HistGradientBoostingClassifier(max_depth=None, )  # Best ML model found
+            # from sklearn.neighbors import KNeighborsClassifier
+            # ml_model = KNeighborsClassifier(n_neighbors=5, metric='minkowski', p=2)
 
         self.model = ml_model
         self.scaler = None
