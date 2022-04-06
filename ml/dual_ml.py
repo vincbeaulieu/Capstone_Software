@@ -129,9 +129,19 @@ def initialize(dataset_path, model_size=5, model_qty=3):
     return ml_objects
 
 
-def launch():
-    cpu_limit()
+def load(ml_qty):
+    ml_objects = []
 
+    for j in range(ml_qty):
+        save_path = "many_ml/ml_" + str(j+1)
+        ml_objects.append(MLObject(save_path, _save_dir + save_path + "/dataset.csv").load(save_path))
+
+    return ml_objects
+
+
+def launch():
+    #cpu_limit()
+    print("launch")
     dataset_path = "../csv/suyashretry.csv"
 
     # INITIALIZE START #
@@ -144,6 +154,8 @@ def launch():
     model_size = 5  # 5
     ml_objects, ml_groups = ml_gen(_data_values, _data_keys, group_size=model_size, ml_qty=model_qty)
     # INITIALIZE END #
+
+    #ml_objects = load(model_qty)
 
     # Testing the model
     data_len = len(_data_values)

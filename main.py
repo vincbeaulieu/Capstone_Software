@@ -43,18 +43,22 @@ def launch():
     file_pathname = filepath + filename
 
     # Creating many ML models
-    model_qty = 3  # 3
+    model_qty = 2  # 3
     model_size = 5  # 5
     ml_objects = None
+    
+    import ml.dual_ml as dual_ml
+    dual_ml.launch()
+
 
     # Import and create a ML model
     # from sklearn.neighbors import KNeighborsClassifier
     # ml_model = KNeighborsClassifier(n_neighbors=5, metric='minkowski', p=2)
 
     # Haptic feedback initialization
-    hf.start() # Disabled by default
+#    hf.start() # Disabled by default
 
-
+    exit(0)
     print("Starting myoband connection...")
     p = multiprocessing.Process(target=read_myoband_data, args=(q1, q2,))
     try:
@@ -167,7 +171,3 @@ if __name__ == '__main__':
     launch()
     pass
 
-
-=======
-   test()
->>>>>>> main
